@@ -43,6 +43,7 @@ def main(args=None):
 
     episodes = 10
 
+    # NOTE (liam): if using Humble is guarenteed, would it be faster to not do this?
     # This is done to bypass the problem between using two different distros of ROS (humble and foxy)
     # They use different python versions, for this reason the action and observation space cannot be deserialized from the trained model
     # The solution is passing them as custom_objects, so that they won't be loaded from the model

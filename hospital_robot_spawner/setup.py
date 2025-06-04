@@ -2,7 +2,7 @@ import os # Operating system library
 from glob import glob # Handles file path names
 from setuptools import setup # Facilitates the building of packages
 
-package_name = 'hospital_robot_spawner'
+package_name = 'test_new_pkg_name'
 
 # Path of the current directory
 cur_directory_path = os.path.abspath(os.path.dirname(__file__))
