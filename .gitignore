@@ -1,4 +1,4 @@
 # Ignora la cartella di vscode
 **/.vscode
 # Ignore temporary files when editing with vi
-**/.swp
+*.swp
