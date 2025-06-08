@@ -17,7 +17,7 @@ class HospitalBotEnv(RobotController, Env):
         - step: makes a step of the current episode
         - reset: resets the simulation environment when an episode is finished
         - close: terminates the environment
-
+zing-premium-omission-cargo-handiness-turkey
     This class inherits from both RobotController and Env.
     Env is a standard class of Gymnasium library which defines the basic needs of an RL environment.
     
@@ -42,7 +42,9 @@ class HospitalBotEnv(RobotController, Env):
         # Initializes the Target location (x,y) - effective only for randomization level 0 and 1 (see below)
         self._target_location = np.array([1, 10], dtype=np.float32) # Default is [1, 10]
         # Initializes the starting agent location for each episode (x,y,angle) - effective only for randomization level 0 and 2 (see below)
-        self._initial_agent_location = np.array([1, 16, -90], dtype=np.float32) # Default is [1, 16, -90]
+        self._initial_agent_location = np.array([0, 0, -90], dtype=np.float32)  # Default is [1, 16, -90]
+        # NOTE: remove this, not necessary for maze env
+
         # Defines the level of randomization of the env, the more you randomize the more the model will be generalizable (no overfitting)
         # 0: no randomization
         # 1: semi-randomize only robot's initial position
@@ -77,13 +79,6 @@ class HospitalBotEnv(RobotController, Env):
         self._minimum_dist_from_obstacles = 0.26
         
         ## Adaptive heuristic parameters
-        # Attraction threshold and factor for adaptive heuristic
-        self._attraction_threshold = 3
-        self._attraction_factor = 1
-        # Repulsion threshold and factor for adaptive heuristic
-        self._repulsion_threshold = 1
-        self._repulsion_factor = 0.1
-        # Distance penalty factor
         self._distance_penalty_factor = 1
 
         # Initialize step count
@@ -323,6 +318,7 @@ class HospitalBotEnv(RobotController, Env):
         #self.get_logger().info("Xt: " + str(self._robot_target_x) + " - Yt: " + str(self._robot_target_y))
         #self.get_logger().info("Polar coordinates: " + str(self._polar_coordinates))
 
+    # NOTE: really want to get rid of this
     def randomize_target_location(self):
         ## This method randomizes target position based on self._randomize_env_level (2, 3, 4 or 5)
         # Random Level 0 and 1 never enter here - Target location is still

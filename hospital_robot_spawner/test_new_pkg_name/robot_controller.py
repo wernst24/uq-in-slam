@@ -46,8 +46,8 @@ class RobotController(Node):
 
         # Reset simulation client - UNUSED
         self.client_sim = self.create_client(Empty, "/reset_simulation")
-        
-        
+
+
         # Get the directory of the sdf of the robot
         self._pkg_dir = os.path.join(
             get_package_share_directory("hospital_robot_spawner"), "models",
@@ -56,7 +56,7 @@ class RobotController(Node):
         # Initialize attributes - This will be immediately re-written when the simulation starts
         self._agent_location = np.array([np.float32(1),np.float32(16)])
         self._laser_reads = np.array([np.float32(10)] * 61)
-    
+
     # Method to send the velocity command to the robot
     def send_velocity_command(self, velocity):
         msg = Twist()
@@ -133,74 +133,3 @@ class RobotController(Node):
             #self.get_logger().info("The Environment has been successfully reset")
         except Exception as e:
             self.get_logger().error("Service call failed: %r" % (e,))
-
-    # NOT USED - Method to reset the simulation (calls the service /reset_simulation)
-    def call_reset_simulation_service(self):
-        while not self.client_sim.wait_for_service(1.0):
-            self.get_logger().warn("Waiting for service...")
-
-        request = Empty.Request()
-
-        future = self.client_sim.call_async(request)
-        future.add_done_callback(partial(self.callback_reset_simulation))
-
-    # NOT USED - Method that elaborates the future obtained by callig the /reset_simulation service
-    def callback_reset_simulation(self, future):
-        try:
-            response= future.result()
-            #self.get_logger().info("The Simulation has been successfully reset")
-            self._done_reset_sim = True
-        except Exception as e:
-            self.get_logger().error("Service call failed: %r" % (e,))
-
-    # NOT USED - Method to unspawn the robot from the simulation
-    def call_delete_entity_service(self):
-        client = self.create_client(DeleteEntity, '/delete_entity')
-        while not client.wait_for_service(1.0):
-            self.get_logger().warn("Waiting for service...")
-
-        request = DeleteEntity.Request()
-        request.name = 'HospitalBot'
-
-        future = client.call_async(request)
-        future.add_done_callback(partial(self.callback_delete_entity))
-
-    # NOT USED - Method that elaborates the future obtained by callig the /delete_entity service
-    def callback_delete_entity(self, future):
-        try:
-            response= future.result()
-            self.get_logger().info("The Robot has been successfully UN-spawned")
-            self._done_delete = True
-        except Exception as e:
-            self.get_logger().error("DeleteEntity Service call failed: %r" % (e,))
-
-    # NOT USED - Method to spawn the robot inside the simulation at any given position
-    def call_spawn_entity_service(self):
-        client = self.create_client(SpawnEntity, '/spawn_entity')
-        while not client.wait_for_service(1.0):
-            self.get_logger().warn("Waiting for service...")
-
-        request = SpawnEntity.Request()
-        request.name = 'HospitalBot'
-        request.xml = open(self._pkg_dir, 'r').read()
-        request.robot_namespace = 'demo'
-        # Here we set the position - Add random floats to x,y coordinates to make the training more generalizable
-        request.initial_pose.position.x = float(1) + float(np.random.rand(1)*2-1) # + random float [-1 , 1]
-        request.initial_pose.position.y = float(16) + float(np.random.rand(1) - 0.5)# + random float [-0,5 , 0,5]
-        request.initial_pose.position.z = float(0)
-        # Here we set the orientation - Add random float to the angle to make the training more generalizable
-        desired_angle = float(math.radians(-90) + math.radians(np.random.rand(1)*60-30)) # + random float [-30, 30]
-        request.initial_pose.orientation.z = float(math.sin(desired_angle/2))
-        request.initial_pose.orientation.w = float(math.cos(desired_angle/2))
-
-        future = client.call_async(request)
-        future.add_done_callback(partial(self.callback_spawn_entity))
-
-    # NOT USED - Method that elaborates the future obtained by callig the /spawn_entity service
-    def callback_spawn_entity(self, future):
-        try:
-            response= future.result()
-            self.get_logger().info("The Robot has been successfully spawned")
-            self._done_spawn = True
-        except Exception as e:
-            self.get_logger().error("SpawnEntity Service call failed: %r" % (e,))
