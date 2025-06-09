@@ -2,3 +2,4 @@
 **/.vscode
 # Ignore temporary files when editing with vi
 *.swp
+notes.txt
