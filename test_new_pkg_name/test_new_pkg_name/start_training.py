@@ -14,6 +14,7 @@ import optuna
 from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3.common.monitor import Monitor
 
+
 class TrainingNode(Node):
 
     def __init__(self):
@@ -23,8 +24,9 @@ class TrainingNode(Node):
         self._training_mode = "training"
 
         # Get training parameters from Yaml file
-        #self.test = super().get_parameter('test').value
-        #self.get_logger().info("Test parameter: " + str(self.test))
+        # self.test = super().get_parameter('test').value
+        # self.get_logger().info("Test parameter: " + str(self.test))
+
 
 def main(args=None):
 
@@ -180,6 +182,7 @@ def optimize_agent(trial):
 
     except Exception as e:
         return -10000
+
 
 if __name__ == "__main__":
     main()

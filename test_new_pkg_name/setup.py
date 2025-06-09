@@ -45,16 +45,17 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='Tommaso Van Der Meer',
-    maintainer_email='tommaso.vandermeer@student.unisi.it',
-    description='This package creates a simulation in Gazebo which includes a differential drive robot with Lidar and a Hospital world',
+    maintainer='Liam Ernst',
+    maintainer_email='lae5777@rit.edu',
+    description='This package creates a simulation in Gazebo which includes a differential drive robot with Lidar and a Maze world',
     license='I am a student, I dont know what to put here :)',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-          'spawn_demo = hospital_robot_spawner.spawn_demo:main',
-          'start_training = hospital_robot_spawner.start_training:main',
-          'trained_agent = hospital_robot_spawner.trained_agent:main',
+          'spawn_demo = test_new_pkg_name.spawn_demo:main',
+          'start_training = test_new_pkg_name.start_training:main',
+          'trained_agent = test_new_pkg_name.trained_agent:main',
+          'random_agent = test_new_pkg_name.random_agent:main',
         ],
     },
 )

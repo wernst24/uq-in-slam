@@ -2,7 +2,7 @@ import rclpy
 from gymnasium import Env
 from gymnasium.spaces import Dict, Box
 import numpy as np
-from hospital_robot_spawner.robot_controller import RobotController
+from test_new_pkg_name.robot_controller import RobotController
 import math
 #from rcl_interfaces.srv import GetParameters
 

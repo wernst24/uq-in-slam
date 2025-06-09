@@ -50,7 +50,7 @@ class RobotController(Node):
 
         # Get the directory of the sdf of the robot
         self._pkg_dir = os.path.join(
-            get_package_share_directory("hospital_robot_spawner"), "models",
+            get_package_share_directory("test_new_pkg_name"), "models",
         "pioneer3at", "model.sdf")
 
         # Initialize attributes - This will be immediately re-written when the simulation starts
