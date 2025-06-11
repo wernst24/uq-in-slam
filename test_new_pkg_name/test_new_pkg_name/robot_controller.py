@@ -9,7 +9,8 @@ import math
 from gazebo_msgs.srv import DeleteEntity, SpawnEntity, SetModelState, SetEntityState
 import os
 from ament_index_python.packages import get_package_share_directory
-#from rclpy.callback_groups import ReentrantCallbackGroup, MutuallyExclusiveCallbackGroup
+# from rclpy.callback_groups import ReentrantCallbackGroup, MutuallyExclusiveCallbackGroup
+
 
 class RobotController(Node):
     """
@@ -66,10 +67,8 @@ class RobotController(Node):
 
     # Method that saves the position of the robot each time the topic /demo/odom receives a new message
     def pose_callback(self, msg: Odometry):
-        self._agent_location = np.array([np.float32(np.clip(msg.pose.pose.position.x,-12,12)), np.float32(np.clip(msg.pose.pose.position.y,-35,21))])
-        self._agent_orientation = 2* math.atan2(msg.pose.pose.orientation.z, msg.pose.pose.orientation.w)
-        #self.get_logger().info("Agent position: " + str(self._agent_location))
-        #self.get_logger().info("Agent orientation: " + str(math.degrees(self._agent_orientation)))
+        self._agent_location = np.array([np.float32(np.clip(msg.pose.pose.position.x, -12, 12)), np.float32(np.clip(msg.pose.pose.position.y, -35, 21))])
+        self._agent_orientation = 2 * math.atan2(msg.pose.pose.orientation.z, msg.pose.pose.orientation.w)
         self._done_pose = True
 
     # Method that saves the laser reads each time the topic /demo/laser/out receives a new message
@@ -77,7 +76,6 @@ class RobotController(Node):
         self._laser_reads = np.array(msg.ranges)
         # Converts inf values to 10
         self._laser_reads[self._laser_reads == np.inf] = np.float32(10)
-        #self.get_logger().info("Min Laser Read: " + str(min(self._laser_reads)))
         self._done_laser = True
 
     # Method to set the state of the robot when an episode ends - /demo/set_entity_state service
@@ -109,27 +107,5 @@ class RobotController(Node):
             response= future.result()
             #self.get_logger().info("The Environment has been successfully reset")
             self._done_set_rob_state = True
-        except Exception as e:
-            self.get_logger().error("Service call failed: %r" % (e,))
-
-    # Method to set the state of the target when an episode ends - /demo/set_entity_state service
-    def call_set_target_state_service(self, position=[1, 10]):
-        while not self.client_state.wait_for_service(1.0):
-            self.get_logger().warn("Waiting for service...")
-
-        request = SetEntityState.Request()
-        request.state.name = "Target"
-        # Pose (position and orientation)
-        request.state.pose.position.x = float(position[0])
-        request.state.pose.position.y = float(position[1])
-
-        future = self.client_state.call_async(request)
-        future.add_done_callback(partial(self.callback_set_target_state))
-
-    # Method that elaborates the future obtained by callig the call_set_target_state_service method
-    def callback_set_target_state(self, future):
-        try:
-            response= future.result()
-            #self.get_logger().info("The Environment has been successfully reset")
         except Exception as e:
             self.get_logger().error("Service call failed: %r" % (e,))
