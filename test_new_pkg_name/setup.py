@@ -56,6 +56,7 @@ setup(
           'start_training = test_new_pkg_name.start_training:main',
           'trained_agent = test_new_pkg_name.trained_agent:main',
           'random_agent = test_new_pkg_name.random_agent:main',
+          'always_forward = test_new_pkg_name.always_forward:main',
         ],
     },
 )

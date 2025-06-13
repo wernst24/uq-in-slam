@@ -28,7 +28,6 @@ def main():
         
     # Create the node
     node = rclpy.create_node("entity_spawner")
-    node.get_logger().info("HERE WE GOOO")
 
     # Show progress in the terminal window
     node.get_logger().info(
@@ -44,7 +43,7 @@ def main():
     ## SPAWN ROBOT
     # Get path to the robot
     sdf_file_path = os.path.join(
-        get_package_share_directory("hospital_robot_spawner"), "models",
+        get_package_share_directory("test_new_pkg_name"), "models",
         "pioneer3at", "model.sdf")
 
     # Show file path
@@ -62,28 +61,6 @@ def main():
     desired_angle = float(math.radians(-90))
     request.initial_pose.orientation.z = float(math.sin(desired_angle/2))
     request.initial_pose.orientation.w = float(math.cos(desired_angle/2))
-
-    node.get_logger().info("Sending service request to `/spawn_entity`")
-    future = client.call_async(request)
-    rclpy.spin_until_future_complete(node, future)
-    if future.result() is not None:
-        print('response: %r' % future.result())
-    else:
-        raise RuntimeError(
-            'exception while calling service: %r' % future.exception())
-
-    ## SPAWN TARGET
-    # Get path to the target
-    target_sdf_file_path = os.path.join(
-        get_package_share_directory("hospital_robot_spawner"), "models",
-        "Target", "model.sdf")
-
-    request = SpawnEntity.Request()
-    request.name = "Target"
-    request.xml = open(target_sdf_file_path, 'r').read()
-    request.initial_pose.position.x = float(-10)
-    request.initial_pose.position.y = float(18)
-    request.initial_pose.position.z = float(0.01)
 
     node.get_logger().info("Sending service request to `/spawn_entity`")
     future = client.call_async(request)
