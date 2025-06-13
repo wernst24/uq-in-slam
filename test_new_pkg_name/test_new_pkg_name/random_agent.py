@@ -19,7 +19,7 @@ def main(args=None):
     gym.envs.registration.register(
             id="HospitalBotEnv-v0",
             entry_point="test_new_pkg_name.hospitalbot_env:HospitalBotEnv",
-            max_episode_steps=300,
+            max_episode_steps=3000,
     )
 
     node.get_logger().info("The environment has been registered")

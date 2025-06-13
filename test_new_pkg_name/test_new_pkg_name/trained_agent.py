@@ -4,9 +4,8 @@ import rclpy
 from rclpy.node import Node
 from gymnasium.envs.registration import register
 from hospital_robot_spawner.hospitalbot_env import HospitalBotEnv
-from hospital_robot_spawner.hospitalbot_simplified_env import HospitalBotSimpleEnv
 import gymnasium as gym
-from stable_baselines3 import PPO
+from stable_baselines3 import DQN
 from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.env_checker import check_env
@@ -25,15 +24,14 @@ def main(args=None):
 
     # We get the dir where the models are saved
     home_dir = os.path.expanduser('~')
-    pkg_dir = 'ros2_ws/src/Hospitalbot-Path-Planning/hospital_robot_spawner'
-    trained_model_path = os.path.join(home_dir, pkg_dir, 'rl_models', 'PPO_risk_seeker.zip')
+    pkg_dir = 'ros2_ws/src/uq-in-slam/test_new_pkg_name'
+    trained_model_path = os.path.join(home_dir, pkg_dir, 'rl_models', 'DQN_test.zip')
 
     # Register the gym environment
     register(
         id="HospitalBotEnv-v0",
-        entry_point="hospital_robot_spawner.hospitalbot_env:HospitalBotEnv",
-        #entry_point="hospital_robot_spawner.hospitalbot_simplified_env:HospitalBotSimpleEnv",
-        max_episode_steps=3000,
+        entry_point="test_new_pkg_name.hospitalbot_env:HospitalBotEnv",
+        max_episode_steps=3000000,
     )
 
     env = gym.make('HospitalBotEnv-v0')
@@ -50,7 +48,7 @@ def main(args=None):
     custom_obj = {'action_space': env.action_space, 'observation_space': env.observation_space}
 
     # Here we load the rained model
-    model = PPO.load(trained_model_path, env=env, custom_objects=custom_obj)
+    model = DQN.load(trained_model_path, env=env, custom_objects=custom_obj)
 
     # Evaluating the trained agent
     Mean_ep_rew, Num_steps = evaluate_policy(model, env=env, n_eval_episodes=100, return_episode_rewards=True, deterministic=True)
