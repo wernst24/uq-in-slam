@@ -1,0 +1,64 @@
+[0.000000] (-) TimerEvent: {}
+[0.000138] (test_new_pkg_name) JobQueued: {'identifier': 'test_new_pkg_name', 'dependencies': OrderedDict()}
+[0.000173] (test_new_pkg_name) JobStarted: {'identifier': 'test_new_pkg_name'}
+[0.085250] (-) TimerEvent: {}
+[0.198659] (-) TimerEvent: {}
+[0.298932] (-) TimerEvent: {}
+[0.399159] (-) TimerEvent: {}
+[0.499382] (-) TimerEvent: {}
+[0.599612] (-) TimerEvent: {}
+[0.699849] (-) TimerEvent: {}
+[0.800068] (-) TimerEvent: {}
+[0.900235] (-) TimerEvent: {}
+[1.000404] (-) TimerEvent: {}
+[1.050816] (test_new_pkg_name) Command: {'cmd': ['/usr/bin/python3', '-W', 'ignore:setup.py install is deprecated', '-W', 'ignore:easy_install command is deprecated', 'setup.py', 'egg_info', '--egg-base', '../build/test_new_pkg_name', 'build', '--build-base', '/home/lae5777/ros2_ws/src/uq-in-slam/build/test_new_pkg_name/build', 'install', '--record', '/home/lae5777/ros2_ws/src/uq-in-slam/build/test_new_pkg_name/install.log', '--single-version-externally-managed', 'install_data'], 'cwd': '/home/lae5777/ros2_ws/src/uq-in-slam/test_new_pkg_name', 'env': {'VNCDESKTOP': 'multi-vision:23 (lae5777)', 'PROFILEHOME': '', 'KDE_FULL_SESSION': 'true', 'LANGUAGE': '', 'USER': 'lae5777', 'SSH_CLIENT': '129.21.75.177 56417 22', 'QT_SCREEN_SCALE_FACTORS': 'VNC-0=1;', 'XDG_SESSION_TYPE': 'x11', 'XCURSOR_SIZE': '24', 'KONSOLE_VERSION': '211203', 'SHLVL': '2', 'LD_LIBRARY_PATH': '/usr/lib/x86_64-linux-gnu/gazebo-11/plugins:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib:/usr/local/lib64:/usr/local/lib64:/usr/local/lib64', 'MOTD_SHOWN': 'pam', 'HOME': '/home/lae5777', 'KDE_APPLICATIONS_AS_SCOPE': '1', 'OLDPWD': '/home/lae5777', 'DESKTOP_SESSION': 'plasma', 'SSH_TTY': '/dev/pts/21', 'ROS_PYTHON_VERSION': '3', 'SHELL_SESSION_ID': 'a42d1171221d4291a348e79731ef48ed', 'GTK_RC_FILES': '/etc/gtk/gtkrc:/home/lae5777/.gtkrc:/home/lae5777/.config/gtkrc', 'GTK_MODULES': 'gail:atk-bridge', 'KDE_SESSION_VERSION': '5', 'KONSOLE_DBUS_SESSION': '/Sessions/1', 'SYSTEMD_EXEC_PID': '150842', 'DBUS_SESSION_BUS_ADDRESS': 'unix:path=/run/user/2906375/bus', 'COLORTERM': 'truecolor', 'KONSOLE_DBUS_WINDOW': '/Windows/1', 'COLCON_PREFIX_PATH': '/home/lae5777/ros2_ws/src/uq-in-slam/install', 'ROS_DISTRO': 'humble', 'LOGNAME': 'lae5777', 'CMAKE_GENERATOR': 'Ninja', 'WINDOWID': '113246215', 'QT_AUTO_SCREEN_SCALE_FACTOR': '0', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'XDG_SESSION_CLASS': 'user', 'COLORFGBG': '15;0', 'TERM': 'xterm-256color', 'XDG_SESSION_ID': '5381', 'ROS_LOCALHOST_ONLY': '0', 'GTK2_RC_FILES': '/etc/gtk-2.0/gtkrc:/home/lae5777/.gtkrc-2.0:/home/lae5777/.config/gtkrc-2.0', 'PATH': '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin', 'SESSION_MANAGER': 'local/multi-vision.cis.rit.edu:@/tmp/.ICE-unix/7242,unix/multi-vision.cis.rit.edu:/tmp/.ICE-unix/7242', 'XDG_RUNTIME_DIR': '/run/user/2906375', 'XCURSOR_THEME': 'breeze_cursors', 'DISPLAY': ':23', 'LANG': 'en_US.UTF-8', 'XDG_CURRENT_DESKTOP': 'KDE', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:', 'AMENT_PREFIX_PATH': '/home/lae5777/ros2_ws/src/uq-in-slam/install/test_new_pkg_name:/opt/ros/humble', 'SHELL': '/bin/bash', 'KRB5CCNAME': 'FILE:/tmp/krb5cc_2906375_bZDf4c', 'QT_ACCESSIBILITY': '1', 'KONSOLE_DBUS_SERVICE': ':1.583', 'PWD': '/home/lae5777/ros2_ws/src/uq-in-slam/build/test_new_pkg_name', 'XDG_CONFIG_DIRS': '/home/lae5777/.config/kdedefaults:/etc/xdg', 'SSH_CONNECTION': '129.21.75.177 56417 129.21.57.42 22', 'PYTHONPATH': '/home/lae5777/ros2_ws/src/uq-in-slam/build/test_new_pkg_name/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/lae5777/ros2_ws/src/uq-in-slam/install/test_new_pkg_name/lib/python3.10/site-packages:/home/lae5777/ros2_ws/src/uq-in-slam/install/test_new_pkg_name/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages', 'KDE_SESSION_UID': '2906375', 'COLCON': '1'}, 'shell': False}
+[1.176633] (-) TimerEvent: {}
+[1.276866] (-) TimerEvent: {}
+[1.309389] (test_new_pkg_name) StdoutLine: {'line': b'running egg_info\n'}
+[1.323550] (test_new_pkg_name) StdoutLine: {'line': b'writing ../build/test_new_pkg_name/test_new_pkg_name.egg-info/PKG-INFO\n'}
+[1.350149] (test_new_pkg_name) StdoutLine: {'line': b'writing dependency_links to ../build/test_new_pkg_name/test_new_pkg_name.egg-info/dependency_links.txt\n'}
+[1.376941] (-) TimerEvent: {}
+[1.390676] (test_new_pkg_name) StdoutLine: {'line': b'writing entry points to ../build/test_new_pkg_name/test_new_pkg_name.egg-info/entry_points.txt\n'}
+[1.432556] (test_new_pkg_name) StdoutLine: {'line': b'writing requirements to ../build/test_new_pkg_name/test_new_pkg_name.egg-info/requires.txt\n'}
+[1.470765] (test_new_pkg_name) StdoutLine: {'line': b'writing top-level names to ../build/test_new_pkg_name/test_new_pkg_name.egg-info/top_level.txt\n'}
+[1.477028] (-) TimerEvent: {}
+[1.512459] (test_new_pkg_name) StdoutLine: {'line': b"reading manifest file '../build/test_new_pkg_name/test_new_pkg_name.egg-info/SOURCES.txt'\n"}
+[1.515273] (test_new_pkg_name) StdoutLine: {'line': b"writing manifest file '../build/test_new_pkg_name/test_new_pkg_name.egg-info/SOURCES.txt'\n"}
+[1.547302] (test_new_pkg_name) StdoutLine: {'line': b'running build\n'}
+[1.547434] (test_new_pkg_name) StdoutLine: {'line': b'running build_py\n'}
+[1.548123] (test_new_pkg_name) StdoutLine: {'line': b'copying test_new_pkg_name/hospitalbot_env.py -> /home/lae5777/ros2_ws/src/uq-in-slam/build/test_new_pkg_name/build/lib/test_new_pkg_name\n'}
+[1.577111] (-) TimerEvent: {}
+[1.616329] (test_new_pkg_name) StdoutLine: {'line': b'running install\n'}
+[1.616801] (test_new_pkg_name) StdoutLine: {'line': b'running install_lib\n'}
+[1.618822] (test_new_pkg_name) StdoutLine: {'line': b'copying /home/lae5777/ros2_ws/src/uq-in-slam/build/test_new_pkg_name/build/lib/test_new_pkg_name/hospitalbot_env.py -> /home/lae5777/ros2_ws/src/uq-in-slam/install/test_new_pkg_name/lib/python3.10/site-packages/test_new_pkg_name\n'}
+[1.677198] (-) TimerEvent: {}
+[1.714680] (test_new_pkg_name) StdoutLine: {'line': b'byte-compiling /home/lae5777/ros2_ws/src/uq-in-slam/install/test_new_pkg_name/lib/python3.10/site-packages/test_new_pkg_name/hospitalbot_env.py to hospitalbot_env.cpython-310.pyc\n'}
+[1.777298] (-) TimerEvent: {}
+[1.791006] (test_new_pkg_name) StdoutLine: {'line': b'running install_data\n'}
+[1.793827] (test_new_pkg_name) StdoutLine: {'line': b'running install_egg_info\n'}
+[1.796459] (test_new_pkg_name) StdoutLine: {'line': b"removing '/home/lae5777/ros2_ws/src/uq-in-slam/install/test_new_pkg_name/lib/python3.10/site-packages/test_new_pkg_name-0.0.0-py3.10.egg-info' (and everything under it)\n"}
+[1.877385] (-) TimerEvent: {}
+[1.934364] (test_new_pkg_name) StdoutLine: {'line': b'Copying ../build/test_new_pkg_name/test_new_pkg_name.egg-info to /home/lae5777/ros2_ws/src/uq-in-slam/install/test_new_pkg_name/lib/python3.10/site-packages/test_new_pkg_name-0.0.0-py3.10.egg-info\n'}
+[1.977487] (-) TimerEvent: {}
+[2.077745] (-) TimerEvent: {}
+[2.177962] (-) TimerEvent: {}
+[2.278212] (-) TimerEvent: {}
+[2.378494] (-) TimerEvent: {}
+[2.419458] (test_new_pkg_name) StdoutLine: {'line': b'running install_scripts\n'}
+[2.455741] (test_new_pkg_name) StdoutLine: {'line': b'Installing always_forward script to /home/lae5777/ros2_ws/src/uq-in-slam/install/test_new_pkg_name/lib/test_new_pkg_name\n'}
+[2.478597] (-) TimerEvent: {}
+[2.510329] (test_new_pkg_name) StdoutLine: {'line': b'Installing random_agent script to /home/lae5777/ros2_ws/src/uq-in-slam/install/test_new_pkg_name/lib/test_new_pkg_name\n'}
+[2.557510] (test_new_pkg_name) StdoutLine: {'line': b'Installing spawn_demo script to /home/lae5777/ros2_ws/src/uq-in-slam/install/test_new_pkg_name/lib/test_new_pkg_name\n'}
+[2.578724] (-) TimerEvent: {}
+[2.614076] (test_new_pkg_name) StdoutLine: {'line': b'Installing start_training script to /home/lae5777/ros2_ws/src/uq-in-slam/install/test_new_pkg_name/lib/test_new_pkg_name\n'}
+[2.654228] (test_new_pkg_name) StdoutLine: {'line': b'Installing trained_agent script to /home/lae5777/ros2_ws/src/uq-in-slam/install/test_new_pkg_name/lib/test_new_pkg_name\n'}
+[2.678824] (-) TimerEvent: {}
+[2.708526] (test_new_pkg_name) StdoutLine: {'line': b"writing list of installed files to '/home/lae5777/ros2_ws/src/uq-in-slam/build/test_new_pkg_name/install.log'\n"}
+[2.778922] (-) TimerEvent: {}
+[2.782830] (test_new_pkg_name) CommandEnded: {'returncode': 0}
+[2.879018] (-) TimerEvent: {}
+[2.979239] (-) TimerEvent: {}
+[3.079402] (-) TimerEvent: {}
+[3.120039] (test_new_pkg_name) JobEnded: {'identifier': 'test_new_pkg_name', 'rc': 0}
+[3.236291] (-) TimerEvent: {}
+[3.236408] (-) EventReactorShutdown: {}

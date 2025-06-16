@@ -48,22 +48,7 @@ class HospitalBotEnv(RobotController, Env):
         # Initializes the min distance from an obstacle for which the episode is concluded without success
         # This accounts for the front dimension of the robot - DO NOT CHANGE THIS
         # I changed it
-        self._minimum_dist_from_obstacles = 0.03
-
-        # valid spawn locations
-        self._valid_spawn_xy = [
-            [0, 0],
-            [2, 0],
-            [4.5, 0],
-            [4.5, -2],
-            [4.5, -4],
-            [3, -4],
-            [3, -3],
-            [2, -3],
-            [0, -4],
-            [0, -2]
-
-                ]
+        self._minimum_dist_from_obstacles = 0.02
 
         # Initialize step count
         self._num_steps = 0
@@ -208,13 +193,10 @@ class HospitalBotEnv(RobotController, Env):
 
     # NOTE: change to randomize position along circuit, IF DESIRED.
     def randomize_robot_location(self):
-        xy = self._valid_spawn_xy[np.random.randint(len(self._valid_spawn_xy))]
-        position_x = xy[0]
-        position_y = xy[1]
-
-        theta = np.random.uniform(0, 2 * np.pi)
-        orientation_z = np.cos(theta)
-        orientation_w = np.sin(theta)
+        position_x = 4.5
+        position_y = -4
+        orientation_z = 0
+        orientation_w = 1.0
         return [position_x, position_y, orientation_z, orientation_w]
 
     # NOTE: implement velocity & collision-based reward

@@ -14,8 +14,8 @@ from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time', default='True')
-    world_file_name = 'circuit.world'
-    pkg_dir = get_package_share_directory('test_new_pkg_name')
+    world_file_name = 'hospital_discretized.world'
+    pkg_dir = get_package_share_directory('hospital_robot_spawner')
 
     os.environ["GAZEBO_MODEL_PATH"] = os.path.join(pkg_dir, 'models')
     #os.environ["GAZEBO_RESOURCE_PATH"] = os.path.join(pkg_dir, 'worlds')
@@ -24,7 +24,7 @@ def generate_launch_description():
     launch_file_dir = os.path.join(pkg_dir, 'launch')
 
     gazebo = ExecuteProcess(
-            cmd=['gzserver', '--verbose', world, '-s', 'libgazebo_ros_init.so',
+            cmd=['gazebo', '--verbose', world, '-s', 'libgazebo_ros_init.so',
             '-s', 'libgazebo_ros_factory.so'],
             output='screen')
 
@@ -32,7 +32,7 @@ def generate_launch_description():
     #spawn_entity = Node(package='gazebo_ros', node_executable='spawn_entity.py',
     #                    arguments=['-entity', 'demo', 'x', 'y', 'z'],
     #                    output='screen')
-    spawn_entity = Node(package='test_new_pkg_name', executable='spawn_demo',
+    spawn_entity = Node(package='hospital_robot_spawner', executable='spawn_demo',
                         arguments=['HospitalBot', 'demo', '1', '16.0', '0.0'],
                         output='screen')
 

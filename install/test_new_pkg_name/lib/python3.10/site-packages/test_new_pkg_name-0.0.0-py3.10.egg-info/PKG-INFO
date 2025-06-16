@@ -1,0 +1,12 @@
+Metadata-Version: 2.1
+Name: test-new-pkg-name
+Version: 0.0.0
+Summary: This package creates a simulation in Gazebo which includes a differential drive robot with Lidar and a Maze world
+Home-page: UNKNOWN
+Maintainer: Liam Ernst
+Maintainer-email: lae5777@rit.edu
+License: I am a student, I dont know what to put here :)
+Platform: UNKNOWN
+
+UNKNOWN
+
