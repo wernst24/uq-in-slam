@@ -1,0 +1,30 @@
+[0.637s] Invoking command in '/home/lae5777/ros2_ws/src/uq-in-slam/test_new_pkg_name': PYTHONPATH=/home/lae5777/ros2_ws/src/uq-in-slam/build/test_new_pkg_name/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/lae5777/ros2_ws/src/uq-in-slam/install/test_new_pkg_name/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../build/test_new_pkg_name build --build-base /home/lae5777/ros2_ws/src/uq-in-slam/build/test_new_pkg_name/build install --record /home/lae5777/ros2_ws/src/uq-in-slam/build/test_new_pkg_name/install.log --single-version-externally-managed install_data
+[0.831s] running egg_info
+[0.835s] writing ../build/test_new_pkg_name/test_new_pkg_name.egg-info/PKG-INFO
+[0.843s] writing dependency_links to ../build/test_new_pkg_name/test_new_pkg_name.egg-info/dependency_links.txt
+[0.850s] writing entry points to ../build/test_new_pkg_name/test_new_pkg_name.egg-info/entry_points.txt
+[0.857s] writing requirements to ../build/test_new_pkg_name/test_new_pkg_name.egg-info/requires.txt
+[0.864s] writing top-level names to ../build/test_new_pkg_name/test_new_pkg_name.egg-info/top_level.txt
+[0.877s] reading manifest file '../build/test_new_pkg_name/test_new_pkg_name.egg-info/SOURCES.txt'
+[0.879s] writing manifest file '../build/test_new_pkg_name/test_new_pkg_name.egg-info/SOURCES.txt'
+[0.885s] running build
+[0.886s] running build_py
+[0.887s] copying test_new_pkg_name/hospitalbot_env.py -> /home/lae5777/ros2_ws/src/uq-in-slam/build/test_new_pkg_name/build/lib/test_new_pkg_name
+[0.902s] running install
+[0.902s] running install_lib
+[0.904s] copying /home/lae5777/ros2_ws/src/uq-in-slam/build/test_new_pkg_name/build/lib/test_new_pkg_name/hospitalbot_env.py -> /home/lae5777/ros2_ws/src/uq-in-slam/install/test_new_pkg_name/lib/python3.10/site-packages/test_new_pkg_name
+[0.923s] byte-compiling /home/lae5777/ros2_ws/src/uq-in-slam/install/test_new_pkg_name/lib/python3.10/site-packages/test_new_pkg_name/hospitalbot_env.py to hospitalbot_env.cpython-310.pyc
+[0.940s] running install_data
+[0.941s] copying launch/gazebo_world.launch.py -> /home/lae5777/ros2_ws/src/uq-in-slam/install/test_new_pkg_name/share/test_new_pkg_name/launch
+[0.961s] copying ./models/pioneer3at/model.sdf -> /home/lae5777/ros2_ws/src/uq-in-slam/install/test_new_pkg_name/share/test_new_pkg_name/models/pioneer3at/
+[0.981s] running install_egg_info
+[0.982s] removing '/home/lae5777/ros2_ws/src/uq-in-slam/install/test_new_pkg_name/lib/python3.10/site-packages/test_new_pkg_name-0.0.0-py3.10.egg-info' (and everything under it)
+[1.010s] Copying ../build/test_new_pkg_name/test_new_pkg_name.egg-info to /home/lae5777/ros2_ws/src/uq-in-slam/install/test_new_pkg_name/lib/python3.10/site-packages/test_new_pkg_name-0.0.0-py3.10.egg-info
+[1.113s] running install_scripts
+[1.126s] Installing always_forward script to /home/lae5777/ros2_ws/src/uq-in-slam/install/test_new_pkg_name/lib/test_new_pkg_name
+[1.137s] Installing random_agent script to /home/lae5777/ros2_ws/src/uq-in-slam/install/test_new_pkg_name/lib/test_new_pkg_name
+[1.147s] Installing spawn_demo script to /home/lae5777/ros2_ws/src/uq-in-slam/install/test_new_pkg_name/lib/test_new_pkg_name
+[1.158s] Installing start_training script to /home/lae5777/ros2_ws/src/uq-in-slam/install/test_new_pkg_name/lib/test_new_pkg_name
+[1.168s] Installing trained_agent script to /home/lae5777/ros2_ws/src/uq-in-slam/install/test_new_pkg_name/lib/test_new_pkg_name
+[1.179s] writing list of installed files to '/home/lae5777/ros2_ws/src/uq-in-slam/build/test_new_pkg_name/install.log'
+[1.200s] Invoked command in '/home/lae5777/ros2_ws/src/uq-in-slam/test_new_pkg_name' returned '0': PYTHONPATH=/home/lae5777/ros2_ws/src/uq-in-slam/build/test_new_pkg_name/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/lae5777/ros2_ws/src/uq-in-slam/install/test_new_pkg_name/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../build/test_new_pkg_name build --build-base /home/lae5777/ros2_ws/src/uq-in-slam/build/test_new_pkg_name/build install --record /home/lae5777/ros2_ws/src/uq-in-slam/build/test_new_pkg_name/install.log --single-version-externally-managed install_data

@@ -3,7 +3,7 @@
 import rclpy
 from rclpy.node import Node
 from gymnasium.envs.registration import register
-from hospital_robot_spawner.hospitalbot_env import HospitalBotEnv
+from test_new_pkg_name.hospitalbot_env import HospitalBotEnv
 import gymnasium as gym
 from stable_baselines3 import DQN
 from stable_baselines3.common.evaluation import evaluate_policy
@@ -25,7 +25,7 @@ def main(args=None):
     # We get the dir where the models are saved
     home_dir = os.path.expanduser('~')
     pkg_dir = 'ros2_ws/src/uq-in-slam/test_new_pkg_name'
-    trained_model_path = os.path.join(home_dir, pkg_dir, 'rl_models', 'DQN_test.zip')
+    trained_model_path = os.path.join(home_dir, pkg_dir, 'rl_models', 'DQN_test_3.zip')
 
     # Register the gym environment
     register(

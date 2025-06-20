@@ -4,7 +4,6 @@ from gymnasium.spaces import Dict, Box, Discrete
 import numpy as np
 from test_new_pkg_name.robot_controller import RobotController
 import math
-# from rcl_interfaces.srv import GetParameters
 
 
 class HospitalBotEnv(RobotController, Env):
@@ -48,7 +47,22 @@ class HospitalBotEnv(RobotController, Env):
         # Initializes the min distance from an obstacle for which the episode is concluded without success
         # This accounts for the front dimension of the robot - DO NOT CHANGE THIS
         # I changed it
-        self._minimum_dist_from_obstacles = 0.02
+        self._minimum_dist_from_obstacles = 0.03
+
+        # valid spawn locations
+        self._valid_spawn_xy = [
+            [0, 0],
+            [2, 0],
+            [4.5, 0],
+            [4.5, -2],
+            [4.5, -4],
+            [3, -4],
+            [3, -3],
+            [2, -3],
+            [0, -4],
+            [0, -2]
+
+                ]
 
         # Initialize step count
         self._num_steps = 0
@@ -79,9 +93,9 @@ class HospitalBotEnv(RobotController, Env):
 
         if self._normalize_obs is True:
             # # Normalized State space - dictionary with: "Robot position", "Laser reads"
-            self.observation_space = Dict({"laser": Box(low=0, high=1, shape=(61,), dtype=np.float32)})
+            self.observation_space = Dict({"laser": Box(low=0, high=1, shape=(5,), dtype=np.float32)})
         else:
-            self.observation_space = Dict({"laser": Box(low=0, high=np.inf, shape=(61,), dtype=np.float32)})
+            self.observation_space = Dict({"laser": Box(low=0, high=np.inf, shape=(5,), dtype=np.float32)})
 
     def step(self, action):
         done = False
@@ -102,13 +116,8 @@ class HospitalBotEnv(RobotController, Env):
         # Spin the node until laser reads and agent location are updated - VERY IMPORTANT
         self.spin()
 
-        # This is used to overwrite laser reads and see how the agent behaves when all laser samples have max value
-        # self._laser_reads = np.full((61,),10, dtype=np.float32)
-
         # Update robot location and laser reads
         observation = self._get_obs()
-        # self.get_logger().info(str(observation["laser"]))
-        # Update infos
         info = self._get_info()
 
         # check for crash
@@ -124,7 +133,6 @@ class HospitalBotEnv(RobotController, Env):
             # truncate session
             done = True
             truncated = True
-            # debug
 
         self._total_reward += reward
         return observation, reward, done, truncated, info
@@ -140,7 +148,6 @@ class HospitalBotEnv(RobotController, Env):
         self._num_episodes += 1
 
         # Get the new pose of the robot
-        # NOTE: doesn't actually randomize
         pose2d = self.randomize_robot_location()
 
         # Reset the done reset variable
@@ -154,9 +161,6 @@ class HospitalBotEnv(RobotController, Env):
         # Compute the initial observation
         self.spin()
 
-        # This is used to overwrite laser reads and see how the agent behaves when all laser samples have max value
-        # self._laser_reads = np.full((61,),10, dtype=np.float32)
-
         # Updates state and additional infos
         observation = self._get_obs()
         info = self._get_info()
@@ -167,48 +171,30 @@ class HospitalBotEnv(RobotController, Env):
         # reset total reward
         self._total_reward = 0
 
-        # Debug print
-        # self.get_logger().info("Exiting reset function")
-
         return observation, info
 
     def _get_obs(self):
-        # Returns the current state of the system
-        obs = self._laser_reads
-        # Normalize observations
-        if self._normalize_obs is True:
-            obs = self.normalize_observation(obs)
-        # self.get_logger().info("Agent Location: " + str(self._agent_location))
-        return {"laser": obs}
+        return {"laser": self._laser_reads/10}
 
     def _get_info(self):
         return {"laser": self._laser_reads}
 
     def spin(self):
-        # This function spins the node until it gets new sensor data (executes both laser and odom callbacks)
-        self._done_pose = False
+        # spin node until new lidar data
         self._done_laser = False
-        while (self._done_pose is False) or (self._done_laser is False):
+        while self._done_laser is False:
             rclpy.spin_once(self)
 
     # NOTE: change to randomize position along circuit, IF DESIRED.
     def randomize_robot_location(self):
-        position_x = 4.5
-        position_y = -4
-        orientation_z = 0
-        orientation_w = 1.0
+        xy = self._valid_spawn_xy[np.random.randint(len(self._valid_spawn_xy))]
+        position_x = xy[0]
+        position_y = xy[1]
+
+        theta = np.random.uniform(0, 2 * np.pi)
+        orientation_z = np.cos(theta)
+        orientation_w = np.sin(theta)
         return [position_x, position_y, orientation_z, orientation_w]
-
-    # NOTE: implement velocity & collision-based reward
-    def compute_rewards(self, info, action=None):
-        reward = 0
-        return reward
-
-    def normalize_observation(self, observation):
-        # This method normalizes the observations taken from the robot in the range [0,1]
-        # Laser reads range from 0 to 10
-
-        return observation/10
 
     def close(self):
         # # Shuts down the node to avoid creating multiple nodes on re-creation of the env

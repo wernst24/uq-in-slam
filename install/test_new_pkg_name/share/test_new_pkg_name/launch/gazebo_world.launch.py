@@ -24,7 +24,7 @@ def generate_launch_description():
     launch_file_dir = os.path.join(pkg_dir, 'launch')
 
     gazebo = ExecuteProcess(
-            cmd=['gazebo', '--verbose', world, '-s', 'libgazebo_ros_init.so',
+            cmd=['gzserver', '--verbose', '--headless-rendering', world, '-s', 'libgazebo_ros_init.so',
             '-s', 'libgazebo_ros_factory.so'],
             output='screen')
 

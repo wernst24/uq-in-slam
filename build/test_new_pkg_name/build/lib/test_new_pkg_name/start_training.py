@@ -44,36 +44,30 @@ def main(args=None):
     register(
         id="HospitalBotEnv-v0",
         entry_point="test_new_pkg_name.hospitalbot_env:HospitalBotEnv",
-        #entry_point="hospital_robot_spawner.hospitalbot_simplified_env:HospitalBotSimpleEnv",
         max_episode_steps=300000,
     )
 
     node.get_logger().info("The environment has been registered")
 
-    #env = NormalizeReward(gym.make('HospitalBotEnv-v0'))
     env = gym.make('HospitalBotEnv-v0')
     env = Monitor(env)
-
-    # Sample Observation and Action space for Debugging
-    #node.get_logger().info("Observ sample: " + str(env.observation_space.sample()))
-    #node.get_logger().info("Action sample: " + str(env.action_space.sample()))
 
     # Here we check if the custom gym environment is fine
     check_env(env)
     node.get_logger().info("Environment check finished")
 
     # Now we create two callbacks which will be executed during training
-    stop_callback = StopTrainingOnRewardThreshold(reward_threshold=900, verbose=1)
-    eval_callback = EvalCallback(env, callback_on_new_best=stop_callback, eval_freq=100000, best_model_save_path=trained_models_dir, n_eval_episodes=40)
+    stop_callback = StopTrainingOnRewardThreshold(reward_threshold=2000, verbose=1)
+    eval_callback = EvalCallback(env, callback_on_new_best=stop_callback, eval_freq=10000, best_model_save_path=trained_models_dir, n_eval_episodes=40)
 
     model = DQN("MultiInputPolicy", env, verbose=1)
     # Execute training
     try:
-        model.learn(total_timesteps=int(40000000), reset_num_timesteps=False, callback=eval_callback, tb_log_name="DQN_test")
+        model.learn(total_timesteps=int(400000), reset_num_timesteps=False, callback=eval_callback, tb_log_name="DQN_test_2")
     except KeyboardInterrupt:
-        model.save(f"{trained_models_dir}/DQN_test")
+        model.save(f"{trained_models_dir}/DQN_test_2")
     # Save the trained model
-    model.save(f"{trained_models_dir}/DQN_test")
+    model.save(f"{trained_models_dir}/DQN_test_2")
 
     node.get_logger().info("The training is finished, now the node is destroyed")
     node.destroy_node()

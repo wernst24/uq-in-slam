@@ -3,7 +3,7 @@
 import rclpy
 from rclpy.node import Node
 from gymnasium.envs.registration import register
-from hospital_robot_spawner.hospitalbot_env import HospitalBotEnv
+from test_new_pkg_name.hospitalbot_env import HospitalBotEnv
 import gymnasium as gym
 from stable_baselines3 import DQN
 from stable_baselines3.common.evaluation import evaluate_policy

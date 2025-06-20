@@ -56,7 +56,7 @@ class RobotController(Node):
 
         # Initialize attributes - This will be immediately re-written when the simulation starts
         self._agent_location = np.array([np.float32(1),np.float32(16)])
-        self._laser_reads = np.array([np.float32(10)] * 61)
+        self._laser_reads = np.array([np.float32(10)] * 5)
 
     # Method to send the velocity command to the robot
     def send_velocity_command(self, velocity):

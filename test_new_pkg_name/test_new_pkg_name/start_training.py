@@ -5,7 +5,9 @@ from rclpy.node import Node
 from gymnasium.envs.registration import register
 from test_new_pkg_name.hospitalbot_env import HospitalBotEnv
 import gymnasium as gym
-from stable_baselines3 import DQN
+from stable_baselines3.dqn import DQN
+from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
+import torch.nn as nn
 from stable_baselines3.common.env_checker import check_env
 from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold
 import os
@@ -20,6 +22,27 @@ class TrainingNode(Node):
         # Defines which action the script will perform "random_agent", "training", "retraining" or "hyperparam_tuning"
         self._training_mode = "training"
 
+
+class CustomFeatureExtractor(BaseFeaturesExtractor):
+    def __init__(self, observation_space: gym.spaces.Dict, features_dim: int = 64):
+        super().__init__(observation_space, features_dim)
+        self.extractor = nn.Sequential(
+            nn.Linear(5, 64),
+            nn.ReLU(),
+            nn.Linear(64, 32),
+            nn.ReLU()
+        )
+        self._features_dim = 32
+
+    def forward(self, observations):
+        return self.extractor(observations["laser"])
+
+
+policy_kwargs = dict(
+    features_extractor_class=CustomFeatureExtractor,
+    features_extractor_kwargs=dict(features_dim=32),
+    net_arch=[64, 64]  # Two-layer Q-network
+)
 
 def main(args=None):
 
@@ -44,36 +67,43 @@ def main(args=None):
     register(
         id="HospitalBotEnv-v0",
         entry_point="test_new_pkg_name.hospitalbot_env:HospitalBotEnv",
-        #entry_point="hospital_robot_spawner.hospitalbot_simplified_env:HospitalBotSimpleEnv",
         max_episode_steps=300000,
     )
 
     node.get_logger().info("The environment has been registered")
 
-    #env = NormalizeReward(gym.make('HospitalBotEnv-v0'))
     env = gym.make('HospitalBotEnv-v0')
     env = Monitor(env)
-
-    # Sample Observation and Action space for Debugging
-    #node.get_logger().info("Observ sample: " + str(env.observation_space.sample()))
-    #node.get_logger().info("Action sample: " + str(env.action_space.sample()))
 
     # Here we check if the custom gym environment is fine
     check_env(env)
     node.get_logger().info("Environment check finished")
 
     # Now we create two callbacks which will be executed during training
-    stop_callback = StopTrainingOnRewardThreshold(reward_threshold=900, verbose=1)
-    eval_callback = EvalCallback(env, callback_on_new_best=stop_callback, eval_freq=100000, best_model_save_path=trained_models_dir, n_eval_episodes=40)
+    stop_callback = StopTrainingOnRewardThreshold(reward_threshold=2000, verbose=1)
+    eval_callback = EvalCallback(env, callback_on_new_best=stop_callback, eval_freq=10000, best_model_save_path=trained_models_dir, n_eval_episodes=40)
 
-    model = DQN("MultiInputPolicy", env, verbose=1)
+    model = DQN("MultiInputPolicy",
+                env,
+                tensorboard_log=f"{log_dir}/sb3_logs/",
+                learning_rate=1e-3,
+                policy_kwargs=policy_kwargs,
+                buffer_size=32,
+                learning_starts=5000,
+                target_update_interval=500,
+                train_freq=4,
+                gamma=0.99,
+                exploration_fraction=0.3,
+                exploration_final_eps=0.1,
+                verbose=1)
+    
     # Execute training
     try:
-        model.learn(total_timesteps=int(40000000), reset_num_timesteps=False, callback=eval_callback, tb_log_name="DQN_test")
+        model.learn(total_timesteps=int(400000), reset_num_timesteps=False, callback=eval_callback, tb_log_name="DQN_test_3")
     except KeyboardInterrupt:
-        model.save(f"{trained_models_dir}/DQN_test")
+        model.save(f"{trained_models_dir}/DQN_test_3")
     # Save the trained model
-    model.save(f"{trained_models_dir}/DQN_test")
+    model.save(f"{trained_models_dir}/DQN_test_3")
 
     node.get_logger().info("The training is finished, now the node is destroyed")
     node.destroy_node()
