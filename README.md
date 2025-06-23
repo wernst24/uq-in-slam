@@ -1,25 +1,18 @@
-# Hospitalbot path planning
+# Uncertainty Quantification in SLAM
 
-> An infrastructure to train RL agents for a motion planning problem in an indoor environment (built with ROS2, Gazebo, OpenAI Gym, and Stable Baselines3).
+> 
 
 ## Description
 This repository contains an application using ROS2 Humble, Gazebo, OpenAI Gym and Stable Baselines3 to train reinforcement learning agents which generate a feasible sequence of motion controls for a robot with a differential drive and a LIDAR to solve a path planning problem.
 
-![hospitalbot-gif](.images/hospitalbot.gif)
+![circuit1-jpg](.images/circuit1.jpg)
 
 The robot employed is a Pioneer 3AT with 4-wheel differential drive and a 180° laser for obstacle detection. The LIDAR collects 61 distance measurements that can range from 0.08 to 10 meters.
 
 This repository includes the following elements:
-* The 3D simulation environment of the hospital with the robot.
 * A working Gym environment to train RL agents for the motion planning problem.
-* Trained agents capable of reaching short and long distance targets inside the hospital environment while avoiding obstacles more than 80% of the time.
 
 The application should be considered as a practical example for training reinforcement learning models using the open-source software previously mentioned. It is my first project with ROS2, the code is most likely not perfect, but it worked for my purpose.
-
-## Current status
-As this project was developed only for my Master's degree thesis, do not expect many updates over time. I published my work in the hope that I could help someone like me who is starting from scratch with ROS2 applications.
-
-More information about the project can be found inside my thesis, which is available [here](.documents/A_reinforcement_learning_approach_to_path_planning_for_mobile_robots.pdf).
 
 ## Table of contents
 - [Installation](#installation)
@@ -27,9 +20,6 @@ More information about the project can be found inside my thesis, which is avail
     - [Run a random agent](#run-a-random-agent)
     - [Run a trained agent](#run-a-trained-agent)
     - [Train a new agent](#train-a-new-agent)
-    - [Hyperparameters tuning](#hyperparameters-tuning) (WORK IN PROGRESS)
-    - [Re-train an existent agent](#re-train-an-existent-agent) (WORK IN PROGRESS)
-- [References](#references)
 
 ## Installation
 ### Prerequisites
@@ -38,12 +28,11 @@ More information about the project can be found inside my thesis, which is avail
 * Gazebo integration for ROS2 - [install gazebo_ros_pkgs](http://classic.gazebosim.org/tutorials?tut=ros2_installing&cat=connect_ros);
 * Stable Baselines3 (includes also Gym) - [install Stable Baselines3](https://stable-baselines3.readthedocs.io/en/master/guide/install.html);
 * Tensorboard - [install Tensorboard with pyp](https://pypi.org/project/tensorboard/);
-* Optuna (for hyperparameters tuning) - [install Optuna](https://optuna.org/#installation);
 ### Step-by-step installation guide
 First of all, clone this repository inside the src folder of your ROS2 workspace (replace `ros2_ws` with the name of your ROS2 workspace):
 ```
 cd ~/ros2_ws/src
-git clone https://github.com/TommasoVandermeer/Hospitalbot-Path-Planning.git
+git clone https://github.com/wernst24/uq-in-slam.git
 ```
 You will need to copy all the files inside the `models` and `photos` folders inside the `~/.gazebo` repository. However, if you have never run Gazebo, the `~/.gazebo/models` and `~/.gazebo/photos` folders might not exist yet. To create them, simply launch the Gazebo empty world:
 ```
@@ -51,22 +40,23 @@ gazebo
 ```
 Now, close the Gazebo window and the folders should have been created. Copy the files using these commands (replace `ros2_ws` with the name of your ROS2 workspace):
 ```
-cd ~/ros2_ws/src/Hospitalbot-Path-Planning/hospital_robot_spawner
+cd ~/ros2_ws/src/uq-in-slam/test_new_pkg_name
 cp -r models/. ~/.gazebo/models
 cp -r photos/. ~/.gazebo/photos
 ```
 At this point, build your ROS2 workspace to effectively install the package (replace `ros2_ws` with the name of your ROS2 workspace).
 ```
 cd ~/ros2_ws
-colcon build --packages-select hospital_robot_spawner
+colcon build --packages-select test_new_pkg_name
 ```
 To check that everything is working, try to launch the hospital world.
 ```
-ros2 launch hospital_robot_spawner gazebo_world.launch.py
+ros2 launch test_new_pkg_name gazebo_world.launch.py
 ```
-The hospital world should be opened with the Gazebo application. Also the Pioneer 3AT should appear.
+The circuit world should be opened with the Gazebo application. Also the Pioneer 3AT should appear.
 
 ## Getting started
+NOTE: I changed a lot of the stuff past this point
 The application is quite complicated because it includes various modes. For this reason, before running anything, often the main scripts must be edited. I am planning on building a parameters file where all the specifics can be changed so that all the other files can remain untouched.
 
 ### Run a random agent
