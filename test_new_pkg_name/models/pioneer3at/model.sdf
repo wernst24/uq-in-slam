@@ -828,6 +828,49 @@
       <parent>base_link</parent>
     </joint>
 
+    <link name="camera_link">
+      <inertial>
+        <!-- Mass of the camera in kg -->
+        <mass>0.1</mass>
+      </inertial>
+      <!-- Position is towards the front of the robot -->
+      <!-- Laser finder is mounted on top -->
+      <pose>0.15 0 0.30 0 0 0</pose>
+      
+      <!-- Describes the type and properties of the sensor -->
+      <sensor name="my_camera" type="camera">
+        <camera>
+          <horizontal_fov>1.047</horizontal_fov>
+          <image>
+            <width>240</width>
+            <height>240</height>
+          </image>
+          <clip>
+            <near>0.1</near>
+            <far>20</far>
+          </clip>
+        </camera>
+        <always_on>1</always_on>
+        <update_rate>5</update_rate>
+        <!-- ROS 2 Camera Plugin -->
+        <plugin name="ros_camera_plugin" filename="libgazebo_ros_camera.so">
+          <ros>
+            <namespace>/demo</namespace>
+            <remapping>image_raw:=camera/image_raw</remapping>
+            <remapping>camera_info:=camera/camera_info</remapping>
+          </ros>
+          <camera_name>my_camera</camera_name>
+          <frame_name>camera_link</frame_name>
+        </plugin>
+      </sensor>
+    </link>
+
+    <!-- Connect camera sensor to the robot's body -->
+    <joint type="fixed" name="camera_joint">
+      <child>camera_link</child>
+      <parent>base_link</parent>
+    </joint>
+
     <frame name='base_back_joint' attached_to='base_link'>
       <pose>-0.187 0 0.247 0 -0 0</pose>
     </frame>

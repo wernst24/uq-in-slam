@@ -77,6 +77,12 @@ class RobotController(Node):
         # Converts inf values to 10
         self._laser_reads[self._laser_reads == np.inf] = np.float32(10)
         self._done_laser = True
+        
+    def camera_callback(self, msg: RawImg):
+        self._laser_reads = np.array(msg.ranges)
+        # Converts inf values to 10
+        self._laser_reads[self._laser_reads == np.inf] = np.float32(10)
+        self._done_laser = True
 
     # Method to set the state of the robot when an episode ends - /demo/set_entity_state service
     def call_set_robot_state_service(self, robot_pose=[1, 16, -0.707, 0.707]):
