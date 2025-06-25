@@ -1,5 +1,7 @@
 from rclpy.node import Node
-from sensor_msgs.msg import LaserScan
+from sensor_msgs.msg import LaserScan, Image
+import cv2
+from cv_bridge import CvBridge
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
 from std_srvs.srv import Empty
@@ -23,6 +25,7 @@ class RobotController(Node):
         - /demo/cmd_vel : linear and angular velocity of the robot
         - /demo/odom : odometry readings of the chassis of the robot
         - /demo/laser/out : laser readings
+        - /demo/camera/image_raw : laser readings
     
     Services used:
         - /demo/set_entity_state : sets the new state of the robot and target when an episode ends
@@ -42,6 +45,8 @@ class RobotController(Node):
         self.pose_sub = self.create_subscription(Odometry, '/demo/odom', self.pose_callback, 1)
         # Laser subscriber
         self.laser_sub = self.create_subscription(LaserScan, '/demo/laser/out', self.laser_callback, 1)
+        self.bridge = CvBridge()
+        self.camera_sub = self.create_subscription(Image, '/demo/my_camera/image_raw', self.camera_callback, 1)
         # Reset model state client - this resets the pose and velocity of a given model within the world
         self.client_state = self.create_client(SetEntityState, "/demo/set_entity_state")
 
@@ -57,6 +62,7 @@ class RobotController(Node):
         # Initialize attributes - This will be immediately re-written when the simulation starts
         self._agent_location = np.array([np.float32(1),np.float32(16)])
         self._laser_reads = np.array([np.float32(10)] * 5)
+        self._image_raw = np.zeros((84, 84, 3), dtype=np.uint8)
 
     # Method to send the velocity command to the robot
     def send_velocity_command(self, velocity):
@@ -78,11 +84,13 @@ class RobotController(Node):
         self._laser_reads[self._laser_reads == np.inf] = np.float32(10)
         self._done_laser = True
         
-    def camera_callback(self, msg: RawImg):
-        self._laser_reads = np.array(msg.ranges)
-        # Converts inf values to 10
-        self._laser_reads[self._laser_reads == np.inf] = np.float32(10)
-        self._done_laser = True
+    def camera_callback(self, msg: Image):
+        try:
+            cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+            self._image_raw = cv_image
+            self._done_camera = True
+        except Exception as e:
+            self.get_logger().error(f"Camera callback error: {e}")
 
     # Method to set the state of the robot when an episode ends - /demo/set_entity_state service
     def call_set_robot_state_service(self, robot_pose=[1, 16, -0.707, 0.707]):

@@ -1,6 +1,7 @@
 import rclpy
 import gymnasium as gym
 from test_new_pkg_name.hospitalbot_env import HospitalBotEnv
+import cv2
 
 
 class TrainingNode(rclpy.node.Node):
@@ -36,6 +37,10 @@ def main(args=None):
         while not done:
             obs, reward, done, truncated, info = env.step(env.action_space.sample())
             # should log agent state and reward
+
+            # while cv2.waitKey(1) != ord('q'):
+            #   cv2.imshow("[DEBUG] /demo/my_camera/image_raw", obs["image_raw"])
+            # cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":

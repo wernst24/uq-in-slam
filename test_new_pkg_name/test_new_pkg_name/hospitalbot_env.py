@@ -41,9 +41,6 @@ class HospitalBotEnv(RobotController, Env):
         # Initializes the starting agent location for each episode (x,y,angle)
         self._initial_agent_location = np.array([0, 0, -90], dtype=np.float32)
 
-        # If True, the observation space is normalized between [0,1] (except distance which is between [0,6], see below)
-        self._normalize_obs = True
-
         # Initializes the min distance from an obstacle for which the episode is concluded without success
         # This accounts for the front dimension of the robot - DO NOT CHANGE THIS
         # I changed it
@@ -91,11 +88,10 @@ class HospitalBotEnv(RobotController, Env):
                 2: np.array([0.05, -0.3], dtype=np.float32),  # Right
                 }
 
-        if self._normalize_obs is True:
-            # # Normalized State space - dictionary with: "Robot position", "Laser reads"
-            self.observation_space = Dict({"laser": Box(low=0, high=1, shape=(5,), dtype=np.float32)})
-        else:
-            self.observation_space = Dict({"laser": Box(low=0, high=np.inf, shape=(5,), dtype=np.float32)})
+        self.observation_space = Dict({
+            "laser": Box(low=0, high=1, shape=(5,), dtype=np.float32),
+            "image_raw": Box(low=0, high=255, shape=(84, 84, 3), dtype=np.uint8)
+            })
 
     def step(self, action):
         done = False
@@ -174,10 +170,16 @@ class HospitalBotEnv(RobotController, Env):
         return observation, info
 
     def _get_obs(self):
-        return {"laser": self._laser_reads/10}
+        return {
+                "laser": self._laser_reads/10,
+                "image_raw": self._image_raw
+                }
 
     def _get_info(self):
-        return {"laser": self._laser_reads}
+        return {
+                "laser": self._laser_reads,
+                "image_raw": self._image_raw
+                }
 
     def spin(self):
         # spin node until new lidar data
