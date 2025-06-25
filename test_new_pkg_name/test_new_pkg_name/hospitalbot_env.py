@@ -90,7 +90,7 @@ class HospitalBotEnv(RobotController, Env):
 
         self.observation_space = Dict({
             "laser": Box(low=0, high=1, shape=(5,), dtype=np.float32),
-            "image_raw": Box(low=0, high=255, shape=(84, 84, 3), dtype=np.uint8)
+            "image_raw": Box(low=0, high=255, shape=(32, 32), dtype=np.uint8)
             })
 
     def step(self, action):
