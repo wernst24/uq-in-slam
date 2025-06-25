@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
 
-import gym
-from gym import wrappers
-import gym_gazebo
+# imports from random_agent.py (bare minimum for Gymnasium env)
+import rclpy
+import gymnasium as gym
+from test_new_pkg_name.hospitalbot_env import HospitalBotEnv
+
+# previous imports
+# from gym import wrappers
+# import gym_gazebo
 import os
 import time
 import numpy as np
@@ -20,6 +25,7 @@ import Network_Model_Det_TRAIN as net
 
 #os.environ["WANDB_API_KEY"] = " Insert Your Own wandb ID "
 
+
 def render():
     render_skip = 0 #Skip first X episodes.
     render_interval = 50 #Show render Every Y episodes.
@@ -32,12 +38,19 @@ def render():
 
 
 if __name__ == '__main__':
-
+    rclpy.init()  # new
+    # not going to use TrainingNode, will use old method of logging
     args = net.parser.parse_args()
     net.logging.getLogger().setLevel(net.logging.INFO)
 
-    #env = gym.make('GazeboCircuitTurtlebotLidar-v0')
-    env = gym.make('GazeboCircuit2TurtlebotLidar-v0')
+    # registering circuit environment
+    gym.envs.registration.ragister(
+            id="HospitalBotEnv-v0",
+            entry_point="test_new_pkg_name.hospitalbot_env:HospitalBotEnv",
+            max_episode_steps=3000
+    )
+
+    env = gym.make('HospitalBotEnv-v0')
     outdir = '/tmp/gazebo_gym_experiments'
 
     #env = gym.wrappers.Monitor(env, outdir, force=True)

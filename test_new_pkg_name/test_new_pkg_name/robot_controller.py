@@ -60,7 +60,7 @@ class RobotController(Node):
         "pioneer3at", "model.sdf")
 
         # Initialize attributes - This will be immediately re-written when the simulation starts
-        self._agent_location = np.array([np.float32(1),np.float32(16)])
+        self._agent_location = np.array([np.float32(1),np.float32(16)]) 
         self._laser_reads = np.array([np.float32(10)] * 5)
         self._image_raw = np.zeros((32, 32, 3), dtype=np.uint8)
 

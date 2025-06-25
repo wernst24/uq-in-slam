@@ -1,7 +1,7 @@
 import rclpy
 import gymnasium as gym
 from test_new_pkg_name.hospitalbot_env import HospitalBotEnv
-import cv2
+# import cv2
 
 
 class TrainingNode(rclpy.node.Node):
