@@ -34,12 +34,6 @@ setup(
         # Path to the pioneer config file
         (os.path.join('share', package_name,'models/pioneer3at/'), glob('./models/pioneer3at/model.config')),
 
-        # Path to the target sdf file
-        (os.path.join('share', package_name,'models/Target/'), glob('./models/Target/model.sdf')),
-
-        # Path to the target config file
-        (os.path.join('share', package_name,'models/Target/'), glob('./models/Target/model.config')),
-
         # Path to the world file (i.e. warehouse + global environment)
         (os.path.join('share', package_name,'models/'), glob('./worlds/*')),
     ],
