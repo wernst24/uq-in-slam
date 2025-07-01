@@ -36,10 +36,11 @@ def main(args=None):
         done = False
         while not done:
             obs, reward, done, truncated, info = env.step(env.action_space.sample())
+            # node.get_logger().info(f"shape of obs: {obs.shape}")
             # should log agent state and reward
 
             # while cv2.waitKey(1) != ord('q'):
-            #   cv2.imshow("[DEBUG] /demo/my_camera/image_raw", obs["image_raw"])
+            #   cv2.imshow("[DEBUG] /demo/my_camera/image_raw", obs)
             # cv2.destroyAllWindows()
 
 

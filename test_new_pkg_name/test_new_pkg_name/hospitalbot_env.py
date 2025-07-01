@@ -1,6 +1,6 @@
 import rclpy
 from gymnasium import Env
-from gymnasium.spaces import Dict, Box, Discrete
+from gymnasium.spaces import Box, Discrete
 import numpy as np
 from test_new_pkg_name.robot_controller import RobotController
 import math
@@ -88,10 +88,8 @@ class HospitalBotEnv(RobotController, Env):
                 2: np.array([0.05, -0.3], dtype=np.float32),  # Right
                 }
 
-        self.observation_space = Dict({
-            "laser": Box(low=0, high=1, shape=(5,), dtype=np.float32),
-            "image_raw": Box(low=0, high=255, shape=(32, 32), dtype=np.uint8)
-            })
+        # only image
+        self.observation_space = Box(low=0, high=255, shape=(32, 32), dtype=np.uint8)
 
     def step(self, action):
         done = False
@@ -117,7 +115,7 @@ class HospitalBotEnv(RobotController, Env):
         info = self._get_info()
 
         # check for crash
-        if any(observation["laser"] < self._minimum_dist_from_obstacles):
+        if any(info["laser"] < self._minimum_dist_from_obstacles):
             reward -= 200
             self.get_logger().info("CRASHED, reward = " + str(self._total_reward))
             self._total_reward += reward
@@ -170,10 +168,7 @@ class HospitalBotEnv(RobotController, Env):
         return observation, info
 
     def _get_obs(self):
-        return {
-                "laser": self._laser_reads/10,
-                "image_raw": self._image_raw
-                }
+        return self._image_raw
 
     def _get_info(self):
         return {
@@ -187,7 +182,7 @@ class HospitalBotEnv(RobotController, Env):
         while self._done_laser is False:
             rclpy.spin_once(self)
 
-    # NOTE: change to randomize position along circuit, IF DESIRED.
+    # Random angle & position selected from valid spawn points
     def randomize_robot_location(self):
         xy = self._valid_spawn_xy[np.random.randint(len(self._valid_spawn_xy))]
         position_x = xy[0]

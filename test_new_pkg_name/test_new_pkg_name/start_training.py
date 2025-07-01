@@ -24,7 +24,7 @@ class TrainingNode(Node):
 
 
 class CustomFeatureExtractor(BaseFeaturesExtractor):
-    def __init__(self, observation_space: gym.spaces.Dict, features_dim: int = 64):
+    def __init__(self, observation_space: gym.spaces.Box, features_dim: int = 64):
         super().__init__(observation_space, features_dim)
         self.extractor = nn.Sequential(
             nn.Linear(5, 64),
