@@ -51,6 +51,7 @@ setup(
           'trained_agent = test_new_pkg_name.trained_agent:main',
           'random_agent = test_new_pkg_name.random_agent:main',
           'always_forward = test_new_pkg_name.always_forward:main',
+          'det_a2c_train = test_new_pkg_name.Project_Det_TRAIN:main',
         ],
     },
 )

@@ -13,6 +13,9 @@
   <depend>glob</depend>
   <depend>setuptools</depend>
   <depend>launch</depend>
+  <depend>liveplot</depend>
+  <depend>tensorflow</depend>
+  <depend>matplotlib</depend>
   <depend>ament_index_python</depend>
   <depend>geometry_msgs</depend>
   <depend>sensor_msgs</depend>

@@ -4,15 +4,14 @@
 import rclpy
 import gymnasium as gym
 from test_new_pkg_name.hospitalbot_env import HospitalBotEnv
+from rclpy.node import Node
 
 # previous imports
-# from gym import wrappers
-# import gym_gazebo
 import os
 import time
 import numpy as np
 import random
-import liveplot
+from . import liveplot
 import tensorflow as tf
 import matplotlib
 import matplotlib.pyplot as plt
@@ -21,30 +20,44 @@ import wandb
 from distutils.dir_util import copy_tree
 import json
 
-import Network_Model_Det_TRAIN as net
+from . import Network_Model_Det_TRAIN as net
 
 #os.environ["WANDB_API_KEY"] = " Insert Your Own wandb ID "
 
 
 def render():
-    render_skip = 0 #Skip first X episodes.
-    render_interval = 50 #Show render Every Y episodes.
-    render_episodes = 10 #Show Z episodes every rendering.
+    # render_skip = 0 #Skip first X episodes.
+    # render_interval = 50 #Show render Every Y episodes.
+    # render_episodes = 10 #Show Z episodes every rendering.
 
-    if (x%render_interval == 0) and (x != 0) and (x > render_skip):
-        env.render()
-    elif ((x-render_episodes)%render_interval == 0) and (x != 0) and (x > render_skip) and (render_episodes < x):
-        env.render(close=True)
+    # if (x%render_interval == 0) and (x != 0) and (x > render_skip):
+        # env.render()
+        # pass
+    # elif ((x-render_episodes)%render_interval == 0) and (x != 0) and (x > render_skip) and (render_episodes < x):
+        # env.render(close=True)
+        # pass
+   pass
+
+class TrainingNode(Node):
+
+    def __init__(self):
+        super().__init__("hospitalbot_training", allow_undeclared_parameters=True, automatically_declare_parameters_from_overrides=True)
+
+        # Defines which action the script will perform "random_agent", "training", "retraining" or "hyperparam_tuning"
+        self._training_mode = "training"
 
 
-if __name__ == '__main__':
+
+def main():
     rclpy.init()  # new
+    node = TrainingNode()
+    node.get_logger().info("Training node has been created")
     # not going to use TrainingNode, will use old method of logging
     args = net.parser.parse_args()
-    net.logging.getLogger().setLevel(net.logging.INFO)
+    # net.logging.getLogger().setLevel(net.logging.INFO)
 
     # registering circuit environment
-    gym.envs.registration.ragister(
+    gym.envs.registration.register(
             id="HospitalBotEnv-v0",
             entry_point="test_new_pkg_name.hospitalbot_env:HospitalBotEnv",
             max_episode_steps=3000
@@ -65,13 +78,13 @@ if __name__ == '__main__':
     memorySize = 100000
     learnStart = 10000 # timesteps to observe before training
     EXPLORE = memorySize # frames over which to anneal epsilon
-    INITIAL_EPSILON = 1 # starting value of epsilon
+    INITIAL_EPSILON = 1 # starting value of epsilon 
     FINAL_EPSILON = 0.01 # final value of epsilon
     explorationRate = INITIAL_EPSILON
     current_epoch = 0
     loadsim_seconds = 0
-    img_rows, img_cols, img_channels = env.img_rows, env.img_cols, env.img_channels
-
+    # img_rows, img_cols, img_channels = env.img_rows, env.img_cols, env.img_channels
+    img_rows, img_cols, img_channels = 32, 32, 1
 
     model_A2C = net.Model_A2C(num_actions=3)
     agent = net.A2CAgent(model_A2C, learningRate)
@@ -106,7 +119,7 @@ if __name__ == '__main__':
     wandb.init(entity = "bpedraz4", project="Train_Tradional_A2C_{}_lr_{}_kfold".format(total_episodes, learningRate))
 
     start_time = time.time()
-    observation = env.reset()
+    observation, info = env.reset()
     
     for x in range(1, total_episodes, 1):
         done = False
@@ -270,7 +283,8 @@ if __name__ == '__main__':
         m, s = divmod(int(time.time() - start_time), 60)
         h, m = divmod(m, 60)
         
-        net.logging.debug("[%d/%d] Losses: %s" % (x + 1, total_episodes, losses))
+        # net.logging.debug("[%d/%d] Losses: %s" % (x + 1, total_episodes, losses))
+        node.get_logger().debug("[%d/%d] Losses: %s" % (x + 1, total_episodes, losses))
         
 
 
@@ -292,5 +306,9 @@ if __name__ == '__main__':
     #print("Parameters: a="+str)
     print("Overall score: {:0.2f}".format(last_time_steps.mean()))
     #print("Best 100 score: {:0.2f}".format(reduce(lambda x, y: x + y, l[-100:]) / len(l[-100:])))
-
     env.close()
+    node.destroy_node()
+    rclpy.shutdown()
+
+if __name__ == "__main__":
+    main()

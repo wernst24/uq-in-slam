@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import matplotlib
 import matplotlib.pyplot as plt
-import gym
+import gymnasium as gym
 
 rewards_key = 'episode_rewards'
 

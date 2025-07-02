@@ -1,34 +1,32 @@
 #!/usr/bin/env python
 
+#!/usr/bin/env python
+
 import logging
 import argparse
-
 import numpy as np
 import os
 import random
-
 import time
 from distutils.dir_util import copy_tree
+
 import tensorflow as tf
 import tensorflow.keras.layers as kl
 import tensorflow.keras.losses as kls
 import tensorflow.keras.optimizers as ko
 
-
+from tensorflow.keras import backend as K
 from tensorflow.keras.models import Sequential, load_model, Model
-from keras.initializers import normal
-from tensorflow.keras import optimizers
+from tensorflow.keras.initializers import RandomNormal as normal
 from tensorflow.keras.optimizers import RMSprop
-from tensorflow.keras.layers import Conv2D, Flatten, ZeroPadding2D
-from tensorflow.keras.layers import Dense, Dropout, Activation, Input
-from tensorflow.keras.layers import BatchNormalization, Lambda
-from tensorflow.keras.layers import LeakyReLU
-from tensorflow.keras.layers import MaxPooling2D
 from tensorflow.keras.regularizers import l2
-from tensorflow.keras.optimizers import SGD , Adam
-import memory
-from keras import backend as K
-#K.set_image_dim_ordering('th')
+
+from tensorflow.keras.layers import (
+    Conv2D, Flatten, ZeroPadding2D, Dense, Dropout, Activation, Input,
+    BatchNormalization, Lambda, LeakyReLU, MaxPooling2D
+)
+
+from . import memory
 
 
 parser = argparse.ArgumentParser()
@@ -248,7 +246,7 @@ class ProbabilityDistribution(tf.keras.Model):
 
 class Model_A2C(tf.keras.Model):
     def __init__(self, num_actions):
-        super(Model_A2C,self).__init__('mlp_policy')
+        super(Model_A2C,self).__init__(name='mlp_policy')
         self.value_c = 0.5
         self.gamma = 0.99
         self.entropy_c = 1e-4
@@ -326,7 +324,7 @@ class A2CAgent:
         self.model = model
 
         self.model.compile(
-        optimizer=ko.RMSprop(lr=lr),
+        optimizer=ko.RMSprop(learning_rate=lr),
         # Define separate losses for policy logits and value estimate.
         loss=[self._logits_loss, self._value_loss])
 
