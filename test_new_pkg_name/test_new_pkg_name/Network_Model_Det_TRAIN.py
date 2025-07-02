@@ -310,6 +310,7 @@ class Model_A2C(tf.keras.Model):
         # Inputs is a numpy array, convert to a tensor.
         #x = tf.convert_to_tensor(inputs)
         #print(kwargs.get("training") == True)
+        print(f"Shape of inputs (in call function): {inputs.shape}")
         return self.network(inputs)
 
 
