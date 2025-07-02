@@ -120,7 +120,7 @@ def main():
 
     start_time = time.time()
     observation, info = env.reset()
-    observation = observation
+    # observation = observation
     
     for x in range(1, total_episodes, 1):
         done = False
@@ -141,15 +141,13 @@ def main():
 
             actions[batch_step], values[batch_step] = agent.action_value(observation)
             newObservation, rewards[batch_step], dones[batch_step], info = env.step(actions[batch_step])
-            newObservation = newObservation
+            # newObservation = newObservation
 
             mem_observation[batch_step] = observation
             observation = newObservation
 
-
             cumulated_reward += rewards[batch_step]
             #ep_rewards[-1] += rewards[i]
-
             #env._flush(force=True)
 
 

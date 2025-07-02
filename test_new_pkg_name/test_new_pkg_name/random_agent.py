@@ -32,11 +32,11 @@ def main(args=None):
     # execute random agent
     node.get_logger().info("Starting the RANDOM AGENT now")
     for ep in range(episodes):
-        obs = env.reset()
+        obs, info = env.reset()
         done = False
         while not done:
             obs, reward, done, truncated, info = env.step(env.action_space.sample())
-            # node.get_logger().info(f"shape of obs: {obs.shape}")
+            node.get_logger().info(f"shape of obs: {obs.shape}")
             # should log agent state and reward
 
             # while cv2.waitKey(1) != ord('q'):

@@ -62,7 +62,7 @@ class RobotController(Node):
         # Initialize attributes - This will be immediately re-written when the simulation starts
         self._agent_location = np.array([np.float32(1),np.float32(16)]) 
         self._laser_reads = np.array([np.float32(10)] * 5)
-        self._image_raw = np.zeros((32, 32, 3), dtype=np.uint8)
+        self._image_raw = np.zeros((1, 32, 32, 1), dtype=np.uint8)
 
     # Method to send the velocity command to the robot
     def send_velocity_command(self, velocity):
@@ -87,6 +87,7 @@ class RobotController(Node):
     def camera_callback(self, msg: Image):
         try:
             cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='mono8')
+            # self._image_raw = cv_image.reshape((1, 32, 32, 1))  # Reshape to (1, 32, 32, 1)
             self._image_raw = cv_image
             self._done_camera = True
         except Exception as e:

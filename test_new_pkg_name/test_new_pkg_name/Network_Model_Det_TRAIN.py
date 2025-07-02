@@ -311,6 +311,7 @@ class Model_A2C(tf.keras.Model):
         #x = tf.convert_to_tensor(inputs)
         #print(kwargs.get("training") == True)
         print(f"Shape of inputs (in call function): {inputs.shape}")
+        print(f"type of inputs (in call function): {type(inputs)}")
         return self.network(inputs)
 
 
