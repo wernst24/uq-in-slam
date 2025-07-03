@@ -89,10 +89,11 @@ class Model_CNN:
         #model.summary()
 
         model = Sequential()
-        model.add(InputLayer((32,32,1)))
-        model.add(Convolution2D(16, (3,3), strides=(2,2), activation='relu')) #input_shape=(32,32,1)))
+        model.add(Input(shape=(32,32,3)))
+        model.add(Lambda(lambda x: tf.image.rgb_to_grayscale(x))(input))
+        model.add(Conv2D(16, (3,3), strides=(2,2), activation='relu')) #input_shape=(32,32,1)))
         model.add(ZeroPadding2D((1, 1)))
-        model.add(Convolution2D(16, (3,3), strides=(2,2), activation='relu'))
+        model.add(Conv2D(16, (3,3), strides=(2,2), activation='relu'))
         model.add(MaxPooling2D(pool_size=(2, 2), strides=(2,2)))
         model.add(Flatten())
 
@@ -251,7 +252,7 @@ class Model_A2C(tf.keras.Model):
         self.gamma = 0.99
         self.entropy_c = 1e-4
 
-        input = Input((32,32,1), name='policy_input')
+        input = Input((32,32,3), name='policy_input')
         '''
         # ------ CNN Part ------
         conv_1 = Conv2D(64, (3,3), strides=(2,2), activation='relu') (input)
@@ -260,8 +261,9 @@ class Model_A2C(tf.keras.Model):
         maxPool_1 = MaxPooling2D(pool_size=(2, 2), strides=(2,2)) (conv_2)
         flat = Flatten() (maxPool_1)
         '''
+        rgb2gray = Lambda(lambda x: tf.image.rgb_to_grayscale(x))(input)
         # ----- CNN Part (Optional) 1st run -----
-        conv1 = Conv2D(32, (4,4), strides=(2,2), activation='relu') (input)
+        conv1 = Conv2D(32, (4,4), strides=(2,2), activation='relu') (rgb2gray)
         conv2 = Conv2D(64, (4,4), strides=(2,2), activation='relu') (conv1)
         #zero_pad1 = ZeroPadding2D((1, 1)) (conv2)
         conv3 = Conv2D(64, (3,3), strides=(2,2), activation='relu') (conv2)
@@ -310,8 +312,10 @@ class Model_A2C(tf.keras.Model):
         # Inputs is a numpy array, convert to a tensor.
         #x = tf.convert_to_tensor(inputs)
         #print(kwargs.get("training") == True)
-        print(f"Shape of inputs (in call function): {inputs.shape}")
-        print(f"type of inputs (in call function): {type(inputs)}")
+        # print(f"Shape of inputs (in call function): {inputs.shape}")
+        # print(f"type of inputs (in call function): {type(inputs)}")
+        if (inputs.shape.ndims == 3):
+            inputs = tf.expand_dims(inputs, axis=0)
         return self.network(inputs)
 
 
@@ -364,7 +368,7 @@ class A2CAgent:
 
     def _value_loss(self, returns, value):
         # Value loss is typically MSE between value estimates and returns.
-        return self.value_c * kls.mean_squared_error(returns, value)
+        return self.value_c * kls.MeanSquaredError()(returns, value)
 
     def _logits_loss(self, actions_and_advantages, logits):
         # A trick to input actions and advantages through the same API.
@@ -411,4 +415,4 @@ class A2CAgent:
         advs = tf.stop_gradient(advs)
         advs = tf.cast(advs, tf.float32)
         surrogate = tf.minimum(ratio * advs, clipped_ratio * advs)
-        return -tf.reduce_mean(surrogate) - self.entropy_c * kloss.categorical_crossentropy(new_policy, new_policy)
+        return -tf.reduce_mean(surrogate) - self.entropy_c * kls.categorical_crossentropy(new_policy, new_policy)

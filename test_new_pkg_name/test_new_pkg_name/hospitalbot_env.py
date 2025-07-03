@@ -89,7 +89,7 @@ class HospitalBotEnv(RobotController, Env):
                 }
 
         # only image
-        self.observation_space = Box(low=0, high=255, shape=(1, 32, 32, 1), dtype=np.uint8)
+        self.observation_space = Box(low=0, high=1, shape=(32, 32, 3), dtype=np.float32)
 
     def step(self, action):
         done = False
@@ -111,8 +111,8 @@ class HospitalBotEnv(RobotController, Env):
         self.spin()
 
         # Update robot location and laser reads
-        observation = self._get_obs().reshape((1, 32, 32, 1))  # Reshape to match observation space
-        print("Observation shape: ", observation.shape)
+        observation = self._get_obs()
+        # print("Observation shape: ", observation.shape)
         info = self._get_info()
 
         # check for crash
@@ -169,7 +169,7 @@ class HospitalBotEnv(RobotController, Env):
         return observation, info
 
     def _get_obs(self):
-        return self._image_raw
+        return (self._image_raw/255.0).astype(np.float32)
 
     def _get_info(self):
         return {

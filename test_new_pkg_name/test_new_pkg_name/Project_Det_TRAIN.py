@@ -15,7 +15,7 @@ from . import liveplot
 import tensorflow as tf
 import matplotlib
 import matplotlib.pyplot as plt
-import wandb
+# import wandb
 
 from distutils.dir_util import copy_tree
 import json
@@ -84,7 +84,8 @@ def main():
     current_epoch = 0
     loadsim_seconds = 0
     # img_rows, img_cols, img_channels = env.img_rows, env.img_cols, env.img_channels
-    img_rows, img_cols, img_channels = 32, 32, 1
+    # not used?
+    img_rows, img_cols, img_channels = 32, 32, 3
 
     model_A2C = net.Model_A2C(num_actions=3)
     agent = net.A2CAgent(model_A2C, learningRate)
@@ -104,7 +105,7 @@ def main():
     epsilon_discount = 0.999 # 1098 eps to reach 0.1
 
     # For Done/Dynamic
-    addRow = np.zeros((1,32,32,1))
+    addRow = np.zeros((1,img_rows,img_cols,img_channels)) # unused?
     #addRow_action = np.zeros((1,2))
     batch_sz = 16
     ep_rewards = [0.0]
@@ -116,18 +117,17 @@ def main():
     #print(len(next_obs[0][0]))
     #print(type(next_obs))
 
-    wandb.init(entity = "bpedraz4", project="Train_Tradional_A2C_{}_lr_{}_kfold".format(total_episodes, learningRate))
+    # wandb.init(entity = "wernst24", project="Train_Tradional_A2C_{}_lr_{}_kfold".format(total_episodes, learningRate))
 
     start_time = time.time()
     observation, info = env.reset()
-    # observation = observation
     
     for x in range(1, total_episodes, 1):
         done = False
         cumulated_reward = 0
 
 
-        mem_observation = np.zeros(( batch_sz, 32,32,1))
+        mem_observation = np.zeros(( batch_sz, img_rows,img_cols,img_channels))
         actions = np.zeros(batch_sz)
         values = np.zeros(batch_sz)
         rewards = np.zeros(batch_sz)
@@ -140,8 +140,8 @@ def main():
         for i in range(steps): # <----- # of steps
 
             actions[batch_step], values[batch_step] = agent.action_value(observation)
-            newObservation, rewards[batch_step], dones[batch_step], info = env.step(actions[batch_step])
-            # newObservation = newObservation
+            newObservation, rewards[batch_step], dones[batch_step], _, info = env.step(actions[batch_step])
+            # newObservation = newObservation.reshape((32, 32, 3))
 
             mem_observation[batch_step] = observation
             observation = newObservation
@@ -166,10 +166,10 @@ def main():
                     # combine the actions and advantages into a combined array for passing to
                     # actor_loss function
                     losses = agent.model.train_on_batch(mem_observation, [acts_and_advs, returns])
-                    wandb.log({'loss': np.asarray(losses[0])})
+                    # wandb.log({'loss': np.asarray(losses[0])})
 
                 batch_step = -1
-                mem_observation = np.zeros(( batch_sz, 32,32,1))
+                mem_observation = np.zeros(( batch_sz, img_rows,img_cols,img_channels))
                 actions = np.zeros(batch_sz)
                 values = np.zeros(batch_sz)
                 rewards = np.zeros(batch_sz)
@@ -206,7 +206,7 @@ def main():
                 rewards = np.append(rewards, 0)
                 '''
 
-                observation = env.reset()
+                observation, info = env.reset()
                 #break
             '''
             else :
@@ -269,12 +269,12 @@ def main():
             np.save('reward_avg.npy', np_rewards_avg)
             '''
 
-            wandb.log({"Cumulative Rewards": sum(myRewardList[x-50:x]) /50 })
+            # wandb.log({"Cumulative Rewards": sum(myRewardList[x-50:x]) /50 })
 
 
-        wandb.log({'Rewards': np.asarray(myRewardList[x-1]), #<-- numpy type
-                           'epoch': x
-                           })
+        # wandb.log({'Rewards': np.asarray(myRewardList[x-1]), #<-- numpy type
+                        #    'epoch': x
+                        #    })
 
 
         #wandb.log({'Rewards': myRewardList[x-1]})
@@ -291,7 +291,7 @@ def main():
         if (x == 200):
             total_time = ( time.time() - start_time )
 
-            wandb.log({'Total Training Time': total_time })
+            # wandb.log({'Total Training Time': total_time })
             np.save('Total_Test_Time_DET.npy', total_time)
 
             #break;
