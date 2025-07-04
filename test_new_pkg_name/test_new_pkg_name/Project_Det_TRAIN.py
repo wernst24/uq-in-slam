@@ -71,7 +71,7 @@ def main():
     last_time_steps = np.ndarray(0)
 
     # For CNN parameters
-    minibatch_size = 32
+    minibatch_size = 16
     learningRate = 1e-3#1e6
     discountFactor = 0.95
     network_outputs = 3
@@ -235,7 +235,7 @@ def main():
         myRewardList.append(cumulated_reward)
         if x % 50 == 0:
             #SAVE model weights and monitoring data every 50 epochs.
-            agent.model.save_weights('/tmp/turtle_c2c_Actor_ep'+str(x)+"_train")
+            agent.model.save_weights('/tmp/turtle_c2c_Actor_ep'+str(x)+"_train.weights.h5")
             
             #copy_tree(outdir,'/tmp/turtle_c2c_dqn_ep'+str(x))
             #save simulation parameters.
