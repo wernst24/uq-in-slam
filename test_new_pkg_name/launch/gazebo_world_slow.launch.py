@@ -12,7 +12,7 @@ from ament_index_python.packages import get_package_share_directory
 def generate_launch_description():
     ld = []
     use_sim_time = LaunchConfiguration('use_sim_time', default='True')
-    world_file_name = 'circuit_4x4.world'
+    world_file_name = 'circuit.world'
     pkg_dir = get_package_share_directory('test_new_pkg_name')
 
     os.environ["GAZEBO_MODEL_PATH"] = os.path.join(pkg_dir, 'models')
@@ -26,13 +26,13 @@ def generate_launch_description():
         output='screen'))
 
     # Spawn 16 robots in a 4x4 grid, each with a unique name and position
-    for r in range(4):
-        for c in range(4):
+    for r in range(1):
+        for c in range(1):
             ld.append(Node(
                 package='test_new_pkg_name',
                 executable='spawn_demo',
                 arguments=[
-                    'HospitalBot',
+                    f'HospitalBot_{r*4+c}',
                     f'simulation_{r*4+c}',
                     '1',
                     str(100.0 + c*2.0),  # X position
@@ -40,5 +40,4 @@ def generate_launch_description():
                 ],
                 output='screen'
             ))
-
     return LaunchDescription(ld)
