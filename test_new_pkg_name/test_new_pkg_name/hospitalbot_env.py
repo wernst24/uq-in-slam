@@ -29,7 +29,7 @@ class HospitalBotEnv(RobotController, Env):
         - call_reset_simulation_service: resets the simulation
         - call_reset_robot_service: resets the robot position to desired position
     """
-    def __init__(self):
+    def __init__(self, instance_num=0):
 
         # Initialize the Robot Controller Node
         super().__init__()

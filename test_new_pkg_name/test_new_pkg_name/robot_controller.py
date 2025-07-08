@@ -35,23 +35,25 @@ class RobotController(Node):
         - /delete_entity : unspawns the robot from the simulation
         - /spawn_entity : spawns the robot in the simulation in a semi-random position
     """
-    def __init__(self):
-        super().__init__('robot_controller')
+    def __init__(self, instance_num=0):
+        # using namespace to allow for multiple gazebo simulations to run in parallel
+        namespace_name = f"/simulation_{instance_num}"
+        super().__init__('robot_controller', namespace=namespace_name)
         self.get_logger().info("The robot controller node has just been created")
 
         # Action publisher
-        self.action_pub = self.create_publisher(Twist, '/demo/cmd_vel', 10)
+        self.action_pub = self.create_publisher(Twist, f'{namespace_name}/demo/cmd_vel', 10)
         # Position subscriber
-        self.pose_sub = self.create_subscription(Odometry, '/demo/odom', self.pose_callback, 1)
+        self.pose_sub = self.create_subscription(Odometry, f'{namespace_name}/demo/odom', self.pose_callback, 1)
         # Laser subscriber
-        self.laser_sub = self.create_subscription(LaserScan, '/demo/laser/out', self.laser_callback, 1)
+        self.laser_sub = self.create_subscription(LaserScan, f'{namespace_name}/demo/laser/out', self.laser_callback, 1)
         self.bridge = CvBridge()
-        self.camera_sub = self.create_subscription(Image, '/demo/my_camera/image_raw', self.camera_callback, 1)
+        self.camera_sub = self.create_subscription(Image, f'{namespace_name}/demo/my_camera/image_raw', self.camera_callback, 1)
         # Reset model state client - this resets the pose and velocity of a given model within the world
-        self.client_state = self.create_client(SetEntityState, "/demo/set_entity_state")
+        self.client_state = self.create_client(SetEntityState, f"{namespace_name}/demo/set_entity_state")
 
         # Reset simulation client - UNUSED
-        self.client_sim = self.create_client(Empty, "/reset_simulation")
+        self.client_sim = self.create_client(Empty, f"{namespace_name}/reset_simulation")
 
 
         # Get the directory of the sdf of the robot
@@ -73,8 +75,8 @@ class RobotController(Node):
 
     # Method that saves the position of the robot each time the topic /demo/odom receives a new message
     def pose_callback(self, msg: Odometry):
-        self._agent_location = np.array([np.float32(np.clip(msg.pose.pose.position.x, -12, 12)), np.float32(np.clip(msg.pose.pose.position.y, -35, 21))])
-        self._agent_orientation = 2 * math.atan2(msg.pose.pose.orientation.z, msg.pose.pose.orientation.w)
+        # self._agent_location = np.array([np.float32(np.clip(msg.pose.pose.position.x, -12, 12)), np.float32(np.clip(msg.pose.pose.position.y, -35, 21))])
+        # self._agent_orientation = 2 * math.atan2(msg.pose.pose.orientation.z, msg.pose.pose.orientation.w)
         self._done_pose = True
 
     # Method that saves the laser reads each time the topic /demo/laser/out receives a new message

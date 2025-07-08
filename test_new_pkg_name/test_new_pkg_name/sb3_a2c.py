@@ -21,28 +21,6 @@ class TrainingNode(Node):
         # Defines which action the script will perform "random_agent", "training", "retraining" or "hyperparam_tuning"
         self._training_mode = "training"
 
-
-class CustomFeatureExtractor(BaseFeaturesExtractor):
-    def __init__(self, observation_space: gym.spaces.Box, features_dim: int = 64):
-        super().__init__(observation_space, features_dim)
-        self.extractor = nn.Sequential(
-            nn.Linear(5, 64),
-            nn.ReLU(),
-            nn.Linear(64, 32),
-            nn.ReLU()
-        )
-        self._features_dim = 32
-
-    def forward(self, observations):
-        return self.extractor(observations["laser"])
-
-
-policy_kwargs = dict(
-    features_extractor_class=CustomFeatureExtractor,
-    features_extractor_kwargs=dict(features_dim=32),
-    net_arch=[64, 64]  # Two-layer Q-network
-)
-
 def main(args=None):
 
     # Initialize the training node to get the desired parameters
@@ -90,12 +68,13 @@ def main(args=None):
     )
     
     # Execute training
+    trial_number = 1
     try:
-        model.learn(total_timesteps=int(400000), reset_num_timesteps=False, callback=eval_callback, tb_log_name="DQN_test_3")
+        model.learn(total_timesteps=int(400000), reset_num_timesteps=False, callback=eval_callback, tb_log_name="A2C_test_{}".format(trial_number))
     except KeyboardInterrupt:
-        model.save(f"{trained_models_dir}/DQN_test_3")
+        model.save(f"{trained_models_dir}/A2C_test_{trial_number}")
     # Save the trained model
-    model.save(f"{trained_models_dir}/DQN_test_3")
+    model.save(f"{trained_models_dir}/A2C_test_{trial_number}")
 
     node.get_logger().info("The training is finished, now the node is destroyed")
     node.destroy_node()
