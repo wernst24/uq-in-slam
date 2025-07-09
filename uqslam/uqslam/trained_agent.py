@@ -3,7 +3,7 @@
 import rclpy
 from rclpy.node import Node
 from gymnasium.envs.registration import register
-from uqslam.hospitalbot_env import HospitalBotEnv
+from uqslam.hospitalbot_env import UQNavBotEnv
 import gymnasium as gym
 from stable_baselines3 import DQN
 from stable_baselines3.common.evaluation import evaluate_policy
@@ -12,10 +12,13 @@ from stable_baselines3.common.env_checker import check_env
 import os
 import numpy as np
 
+
 class TrainedAgent(Node):
 
     def __init__(self):
-        super().__init__("trained_hospitalbot", allow_undeclared_parameters=True, automatically_declare_parameters_from_overrides=True)
+        super().__init__("trained_hospitalbot", allow_undeclared_parameters=True,
+                         automatically_declare_parameters_from_overrides=True)
+
 
 def main(args=None):
     rclpy.init()
@@ -25,7 +28,8 @@ def main(args=None):
     # We get the dir where the models are saved
     home_dir = os.path.expanduser('~')
     pkg_dir = 'ros2_ws/src/uq-in-slam/uqslam'
-    trained_model_path = os.path.join(home_dir, pkg_dir, 'rl_models', 'DQN_test_3.zip')
+    trained_model_path = os.path.join(
+        home_dir, pkg_dir, 'rl_models', 'DQN_test_3.zip')
 
     # Register the gym environment
     register(
@@ -45,17 +49,21 @@ def main(args=None):
     # This is done to bypass the problem between using two different distros of ROS (humble and foxy)
     # They use different python versions, for this reason the action and observation space cannot be deserialized from the trained model
     # The solution is passing them as custom_objects, so that they won't be loaded from the model
-    custom_obj = {'action_space': env.action_space, 'observation_space': env.observation_space}
+    custom_obj = {'action_space': env.action_space,
+                  'observation_space': env.observation_space}
 
     # Here we load the rained model
     model = DQN.load(trained_model_path, env=env, custom_objects=custom_obj)
 
     # Evaluating the trained agent
-    Mean_ep_rew, Num_steps = evaluate_policy(model, env=env, n_eval_episodes=100, return_episode_rewards=True, deterministic=True)
+    Mean_ep_rew, Num_steps = evaluate_policy(
+        model, env=env, n_eval_episodes=100, return_episode_rewards=True, deterministic=True)
 
     # Print harvested data
-    node.get_logger().info("Mean Reward: " + str(np.mean(Mean_ep_rew)) + " - Std Reward: " + str(np.std(Mean_ep_rew)))
-    node.get_logger().info("Max Reward: " + str(np.max(Mean_ep_rew)) + " - Min Reward: " + str(np.min(Mean_ep_rew)))
+    node.get_logger().info("Mean Reward: " + str(np.mean(Mean_ep_rew)) +
+                           " - Std Reward: " + str(np.std(Mean_ep_rew)))
+    node.get_logger().info("Max Reward: " + str(np.max(Mean_ep_rew)) +
+                           " - Min Reward: " + str(np.min(Mean_ep_rew)))
     node.get_logger().info("Mean episode length: " + str(np.mean(Num_steps)))
 
     # Close env to print harvested info and destroy the hospitalbot node
@@ -64,6 +72,7 @@ def main(args=None):
     node.get_logger().info("The script is completed, now the node is destroyed")
     node.destroy_node()
     rclpy.shutdown()
+
 
 if __name__ == "__main__":
     main()

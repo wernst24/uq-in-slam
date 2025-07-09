@@ -6,7 +6,7 @@ from uqslam.robot_controller import RobotController
 import math
 
 
-class HospitalBotEnv(RobotController, Env):
+class UQNavBotEnv(RobotController, Env):
     """
     This class defines the RL environment. Here are defined:
         - Action space
@@ -29,6 +29,7 @@ class HospitalBotEnv(RobotController, Env):
         - call_reset_simulation_service: resets the simulation
         - call_reset_robot_service: resets the robot position to desired position
     """
+
     def __init__(self, instance_num=0):
 
         # Initialize the Robot Controller Node
@@ -36,7 +37,7 @@ class HospitalBotEnv(RobotController, Env):
         self.get_logger().info("All the publishers/subscribers have been started")
 
         # ENVIRONMENT PARAMETERS
-        self.robot_name = 'HospitalBot'
+        self.robot_name = 'UQNavBotEnv'
 
         # Initializes the starting agent location for each episode (x,y,angle)
         self._initial_agent_location = np.array([0, 0, -90], dtype=np.float32)
@@ -59,7 +60,7 @@ class HospitalBotEnv(RobotController, Env):
             [0, -4],
             [0, -2]
 
-                ]
+        ]
 
         # Initialize step count
         self._num_steps = 0
@@ -74,7 +75,8 @@ class HospitalBotEnv(RobotController, Env):
         self._total_reward = 0
 
         # Debug prints on console
-        self.get_logger().info("INITIAL AGENT LOCATION: " + str(self._initial_agent_location))
+        self.get_logger().info("INITIAL AGENT LOCATION: " +
+                               str(self._initial_agent_location))
         self.get_logger().info("MIN OBSTACLE DIST: " + str(self._minimum_dist_from_obstacles))
 
         # Action space - 3 discrete options: forward, left, right
@@ -83,13 +85,14 @@ class HospitalBotEnv(RobotController, Env):
         # Linear velocity, Angular velocity
         # [m/s, rad/s]
         self.action_to_direction = {
-                0: np.array([0.3, 0.0], dtype=np.float32),  # Forward
-                1: np.array([0.05, 0.3], dtype=np.float32),  # Left
-                2: np.array([0.05, -0.3], dtype=np.float32),  # Right
-                }
+            0: np.array([0.3, 0.0], dtype=np.float32),  # Forward
+            1: np.array([0.05, 0.3], dtype=np.float32),  # Left
+            2: np.array([0.05, -0.3], dtype=np.float32),  # Right
+        }
 
         # only image
-        self.observation_space = Box(low=0, high=1, shape=(32, 32, 3), dtype=np.float32)
+        self.observation_space = Box(
+            low=0, high=1, shape=(32, 32, 3), dtype=np.float32)
 
     def step(self, action):
         done = False
@@ -173,9 +176,9 @@ class HospitalBotEnv(RobotController, Env):
 
     def _get_info(self):
         return {
-                "laser": self._laser_reads,
-                "image_raw": self._image_raw
-                }
+            "laser": self._laser_reads,
+            "image_raw": self._image_raw
+        }
 
     def spin(self):
         # spin node until new lidar data
@@ -192,7 +195,7 @@ class HospitalBotEnv(RobotController, Env):
         theta = np.random.uniform(0, 2 * np.pi)
         orientation_z = np.cos(theta)
         orientation_w = np.sin(theta)
-        
+
         position_x = 0
         position_y = 0
         orientation_z = 0

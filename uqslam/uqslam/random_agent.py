@@ -1,12 +1,13 @@
 import rclpy
 import gymnasium as gym
-from uqslam.hospitalbot_env import HospitalBotEnv
+from uqslam.hospitalbot_env import UQNavBotEnv
 # import cv2
 
 
 class TrainingNode(rclpy.node.Node):
     def __init__(self):
-        super().__init__("hospitalbot_random_agent", allow_undeclared_parameters=True, automatically_declare_parameters_from_overrides=True)
+        super().__init__("hospitalbot_random_agent", allow_undeclared_parameters=True,
+                         automatically_declare_parameters_from_overrides=True)
         # defines which action the script will perform ("random_agent", "training", "retraining", :hyperparam_tuning")
         self._training_mode = "random_agent"
 
@@ -18,9 +19,9 @@ def main(args=None):
 
     # register gymnasium env created in hospitalbot_env module
     gym.envs.registration.register(
-            id="HospitalBotEnv-v0",
-            entry_point="uqslam.hospitalbot_env:HospitalBotEnv",
-            max_episode_steps=3000,
+        id="HospitalBotEnv-v0",
+        entry_point="uqslam.hospitalbot_env:HospitalBotEnv",
+        max_episode_steps=3000,
     )
 
     node.get_logger().info("The environment has been registered")
@@ -35,7 +36,8 @@ def main(args=None):
         obs, info = env.reset()
         done = False
         while not done:
-            obs, reward, done, truncated, info = env.step(env.action_space.sample())
+            obs, reward, done, truncated, info = env.step(
+                env.action_space.sample())
             node.get_logger().info(f"shape of obs: {obs.shape}")
             # should log agent state and reward
 

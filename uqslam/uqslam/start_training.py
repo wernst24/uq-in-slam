@@ -1,9 +1,11 @@
 #!usr/bin/env python3
 
+# ROS Client Library for the Python
 import rclpy
 from rclpy.node import Node
+# Maintained fork of OpenAI’s Gym library
 from gymnasium.envs.registration import register
-from uqslam.hospitalbot_env import HospitalBotEnv
+from uqslam.hospitalbot_env import UQNavBotEnv
 import gymnasium as gym
 from stable_baselines3.dqn import DQN
 from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
@@ -17,7 +19,8 @@ from stable_baselines3.common.monitor import Monitor
 class TrainingNode(Node):
 
     def __init__(self):
-        super().__init__("hospitalbot_training", allow_undeclared_parameters=True, automatically_declare_parameters_from_overrides=True)
+        super().__init__("hospitalbot_training", allow_undeclared_parameters=True,
+                         automatically_declare_parameters_from_overrides=True)
 
         # Defines which action the script will perform "random_agent", "training", "retraining" or "hyperparam_tuning"
         self._training_mode = "training"
@@ -44,6 +47,7 @@ policy_kwargs = dict(
     net_arch=[64, 64]  # Two-layer Q-network
 )
 
+
 def main(args=None):
 
     # Initialize the training node to get the desired parameters
@@ -56,7 +60,7 @@ def main(args=None):
     pkg_dir = 'ros2_ws/src/uq-in-slam/uqslam'
     trained_models_dir = os.path.join(home_dir, pkg_dir, 'rl_models')
     log_dir = os.path.join(home_dir, pkg_dir, 'logs')
-    
+
     # If the directories do not exist we create them
     if not os.path.exists(trained_models_dir):
         os.makedirs(trained_models_dir)
@@ -80,8 +84,10 @@ def main(args=None):
     node.get_logger().info("Environment check finished")
 
     # Now we create two callbacks which will be executed during training
-    stop_callback = StopTrainingOnRewardThreshold(reward_threshold=2000, verbose=1)
-    eval_callback = EvalCallback(env, callback_on_new_best=stop_callback, eval_freq=10000, best_model_save_path=trained_models_dir, n_eval_episodes=40)
+    stop_callback = StopTrainingOnRewardThreshold(
+        reward_threshold=2000, verbose=1)
+    eval_callback = EvalCallback(env, callback_on_new_best=stop_callback,
+                                 eval_freq=10000, best_model_save_path=trained_models_dir, n_eval_episodes=40)
 
     model = DQN("MultiInputPolicy",
                 env,
@@ -96,10 +102,11 @@ def main(args=None):
                 exploration_fraction=0.3,
                 exploration_final_eps=0.1,
                 verbose=1)
-    
+
     # Execute training
     try:
-        model.learn(total_timesteps=int(400000), reset_num_timesteps=False, callback=eval_callback, tb_log_name="DQN_test_3")
+        model.learn(total_timesteps=int(400000), reset_num_timesteps=False,
+                    callback=eval_callback, tb_log_name="DQN_test_3")
     except KeyboardInterrupt:
         model.save(f"{trained_models_dir}/DQN_test_3")
     # Save the trained model
