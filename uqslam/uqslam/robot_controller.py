@@ -37,23 +37,22 @@ class RobotController(Node):
     """
     def __init__(self, instance_num=0):
         # using namespace to allow for multiple gazebo simulations to run in parallel
-        namespace_name = f"/simulation_{instance_num}"
-        super().__init__('robot_controller', namespace=namespace_name)
+        super().__init__('robot_controller')
         self.get_logger().info("The robot controller node has just been created")
 
         # Action publisher
-        self.action_pub = self.create_publisher(Twist, f'{namespace_name}/demo/cmd_vel', 10)
+        self.action_pub = self.create_publisher(Twist, '/demo/cmd_vel', 10)
         # Position subscriber
-        self.pose_sub = self.create_subscription(Odometry, f'{namespace_name}/demo/odom', self.pose_callback, 1)
+        self.pose_sub = self.create_subscription(Odometry, '/demo/odom', self.pose_callback, 1)
         # Laser subscriber
-        self.laser_sub = self.create_subscription(LaserScan, f'{namespace_name}/demo/laser/out', self.laser_callback, 1)
+        self.laser_sub = self.create_subscription(LaserScan, '/demo/laser/out', self.laser_callback, 1)
         self.bridge = CvBridge()
-        self.camera_sub = self.create_subscription(Image, f'{namespace_name}/demo/my_camera/image_raw', self.camera_callback, 1)
+        self.camera_sub = self.create_subscription(Image, '/demo/my_camera/image_raw', self.camera_callback, 1)
         # Reset model state client - this resets the pose and velocity of a given model within the world
-        self.client_state = self.create_client(SetEntityState, f"{namespace_name}/demo/set_entity_state")
+        self.client_state = self.create_client(SetEntityState, "/demo/set_entity_state")
 
         # Reset simulation client - UNUSED
-        self.client_sim = self.create_client(Empty, f"{namespace_name}/reset_simulation")
+        self.client_sim = self.create_client(Empty, "/reset_simulation")
 
 
         # Get the directory of the sdf of the robot

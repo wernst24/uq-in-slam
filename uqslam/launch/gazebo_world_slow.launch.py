@@ -26,19 +26,8 @@ def generate_launch_description():
         output='screen'))
 
     # Spawn 16 robots in a 4x4 grid, each with a unique name and position
-    for r in range(4):
-        for c in range(4):
-            ld.append(Node(
-                package='uqslam',
-                executable='spawn_demo',
-                arguments=[
-                    'HospitalBot',
-                    f'simulation_{r*4+c}',
-                    '1',
-                    str(100.0 + c*2.0),  # X position
-                    str(-100.0 + r*2.0)  # Y position
-                ],
-                output='screen'
-            ))
-
+    spawn_entity = Node(package='uqslam', executable='spawn_demo',
+                        arguments=['HospitalBot', 'demo', '1', '16.0', '0.0'],
+                        output='screen')
+    ld.append(spawn_entity)
     return LaunchDescription(ld)
