@@ -3,7 +3,7 @@
 # imports from random_agent.py (bare minimum for Gymnasium env)
 import rclpy
 import gymnasium as gym
-from uqslam.hospitalbot_env import UQNavBotEnv
+from uqslam.uq_nav_env import UQNavBotEnv
 from rclpy.node import Node
 
 # previous imports
@@ -60,7 +60,7 @@ def main():
     # registering circuit environment
     gym.envs.registration.register(
         id="HospitalBotEnv-v0",
-        entry_point="uqslam.hospitalbot_env:HospitalBotEnv",
+        entry_point="uqslam.uq_nav_env:HospitalBotEnv",
         max_episode_steps=3000
     )
 

@@ -1,13 +1,31 @@
-import rclpy
-from gymnasium import Env
-from gymnasium.spaces import Box, Discrete
-import numpy as np
+"""
+Gymnasium-compatible reinforcement learning environment for training a mobile robot
+to navigate within a Gazebo-based ROS 2 simulation using LIDAR and camera data.
+
+This module defines the `UQNavBotEnv` class, which inherits from both `RobotController`
+(a ROS 2 node handling the robot's interaction with Gazebo) and `gymnasium.Env` (providing
+a standard interface for reinforcement learning). The environment is intended for research
+in uncertainty-aware navigation and decision making in complex environments and has been refactored from HospitalBot.
+
+Key Features:
+- Discrete action space (forward, left, right)
+- Visual observation input (32x32 RGB image)
+- Collision detection via LIDAR
+- Spawn point randomization
+- ROS 2 integration for velocity commands, reset services, and sensor feedback
+- Compatible with Stable-Baselines3 and Gymnasium training pipelines
+
+"""
+import rclpy  # ROS 2 client library in Python
+from gymnasium import Env  # Base class for Gym-compatible RL environments
+from gymnasium.spaces import Box, Discrete  # Spaces for observation and action
+import numpy as np  # Numerical computing
+# Custom ROS2 node for robot control
 from uqslam.robot_controller import RobotController
-import math
 
 
 class UQNavBotEnv(RobotController, Env):
-    """
+    """Can 
     This class defines the RL environment. Here are defined:
         - Action space
         - State space

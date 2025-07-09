@@ -3,7 +3,7 @@
 import rclpy
 from rclpy.node import Node
 from gymnasium.envs.registration import register
-from uqslam.hospitalbot_env import UQNavBotEnv
+from uqslam.uq_nav_env import UQNavBotEnv
 import gymnasium as gym
 from stable_baselines3 import A2C
 from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
@@ -42,10 +42,10 @@ def main(args=None):
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
 
-    # First we register the gym environment created in hospitalbot_env module
+    # First we register the gym environment created in uq_nav_env module
     register(
         id="HospitalBotEnv-v0",
-        entry_point="uqslam.hospitalbot_env:HospitalBotEnv",
+        entry_point="uqslam.uq_nav_env:HospitalBotEnv",
         max_episode_steps=300000,
     )
 

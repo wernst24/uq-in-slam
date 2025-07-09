@@ -63,7 +63,7 @@ The application is quite complicated because it includes various modes. For this
 ### Run a random agent
 Running a random agent helps to understand the basic concepts of the Gym environment developed. Before running the commands, some files need to be edited.
 
-* Open the "hospitalbot_env.py" file, search the `self._randomize_env_level` attribute of the **HospitalBotEnv** class and set one mode between the ones available (recommended: 0, 3, or 5). Also, make sure that the `self._visualize_target` attribute is set to True, otherwise the target will not be visualized. **Save the file at the end**.
+* Open the "uq_nav_env.py" file, search the `self._randomize_env_level` attribute of the **HospitalBotEnv** class and set one mode between the ones available (recommended: 0, 3, or 5). Also, make sure that the `self._visualize_target` attribute is set to True, otherwise the target will not be visualized. **Save the file at the end**.
 * Edit the "start_training.py" file as follows. Search the `self._training_mode` attribute of the **TrainingNode** classe and assign the "random_agent" string to it. Below in the code, the number of episode to be simulated can be set (it should be 10 by default). **Save the file at the end**.
 * Now, build your package again (replace `ros2_ws` with the name of your ROS2 workspace): `cd ~/ros2_ws;
 colcon build --packages-select uqslam`.
@@ -81,7 +81,7 @@ ros2 launch uqslam start_training.launch.py
 There are various trained agents inside the `rl_models` folder. To test one of them, some files need to be edited first.
 
 * Edit the "trained_agent.py" script as follows. Find the `trained_model_path` variable and replace the last element of the `os.path.join` with the name of the desired agent (e.g., PPO_risk_seeker.zip). Save the file at the end.
-* Edit the "hospitalbot_env.py" file to make sure that the correct mode is selected. Search the `self._randomize_env_level` attribute of the **HospitalBotEnv** class and pick one of the listed modalities (e.g., 6). Also, make sure that the `self._visualize_target` attribute is set to True, otherwise the target will not be visualized. Save the file at the end.
+* Edit the "uq_nav_env.py" file to make sure that the correct mode is selected. Search the `self._randomize_env_level` attribute of the **HospitalBotEnv** class and pick one of the listed modalities (e.g., 6). Also, make sure that the `self._visualize_target` attribute is set to True, otherwise the target will not be visualized. Save the file at the end.
 * Now, build your package again (replace `ros2_ws` with the name of your ROS2 workspace): `cd ~/ros2_ws;
 colcon build --packages-select uqslam`.
 
@@ -94,7 +94,7 @@ Finally, open another terminal and run the trained agent.
 ros2 launch uqslam trained_agent.launch.py
 ```
 ### Train a new agent
-* Firstly, edit the "hospitalbot_env.py" file. Set the `self._randomize_env_level` attribute to "5" as this mode implements the best setting to train an agent. Also, make sure that the `self._visualize_target` attribute is set to False, target visualization slows down the training significantly.
+* Firstly, edit the "uq_nav_env.py" file. Set the `self._randomize_env_level` attribute to "5" as this mode implements the best setting to train an agent. Also, make sure that the `self._visualize_target` attribute is set to False, target visualization slows down the training significantly.
 * Open the "start_training.py" file. Set the `self._training_mode` attribute to "training". Scroll down to the training section of the code inside the `elif node._training_mode == "training"` condition. Here, specify the number of total timesteps for which the agent is trained, and set the name of the agent file and the log file as you please.
 * Now, build your package again (replace `ros2_ws` with the name of your ROS2 workspace): `cd ~/ros2_ws;
 colcon build --packages-select uqslam`.

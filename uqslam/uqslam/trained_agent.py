@@ -3,7 +3,7 @@
 import rclpy
 from rclpy.node import Node
 from gymnasium.envs.registration import register
-from uqslam.hospitalbot_env import UQNavBotEnv
+from uqslam.uq_nav_env import UQNavBotEnv
 import gymnasium as gym
 from stable_baselines3 import DQN
 from stable_baselines3.common.evaluation import evaluate_policy
@@ -34,7 +34,7 @@ def main(args=None):
     # Register the gym environment
     register(
         id="HospitalBotEnv-v0",
-        entry_point="uqslam.hospitalbot_env:HospitalBotEnv",
+        entry_point="uqslam.uq_nav_env:HospitalBotEnv",
         max_episode_steps=3000000,
     )
 

@@ -1,6 +1,6 @@
 import rclpy
 import gymnasium as gym
-from uqslam.hospitalbot_env import UQNavBotEnv
+from uqslam.uq_nav_env import UQNavBotEnv
 # import cv2
 
 
@@ -17,10 +17,10 @@ def main(args=None):
     node = TrainingNode()
     node.get_logger().info("Random agent node has been created")
 
-    # register gymnasium env created in hospitalbot_env module
+    # register gymnasium env created in uq_nav_env module
     gym.envs.registration.register(
         id="HospitalBotEnv-v0",
-        entry_point="uqslam.hospitalbot_env:HospitalBotEnv",
+        entry_point="uqslam.uq_nav_env:HospitalBotEnv",
         max_episode_steps=3000,
     )
 
