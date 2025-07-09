@@ -1,6 +1,35 @@
 #!/usr/bin/env python
+"""
+models.py
 
-#!/usr/bin/env python
+This module provides implementations for multiple reinforcement learning models used in robotic control experiments.
+
+Classes:
+--------
+- Model_CNN:
+    A deterministic CNN-based Q-learning model for discrete action spaces.
+    Supports experience replay, target networks, and epsilon-greedy action selection.
+
+- ProbabilityDistribution:
+    A Keras layer that samples actions from a categorical probability distribution.
+    Used in actor-critic models for stochastic action selection.
+
+- Model_A2C:
+    A TensorFlow Keras model implementing the Advantage Actor-Critic (A2C) architecture.
+    Contains separate actor and critic branches for estimating policies and value functions.
+
+- A2CAgent:
+    An agent class that encapsulates training logic, model management, and action selection for the A2C model.
+    Handles environment interaction, return calculation, and policy updates.
+
+Dependencies:
+-------------
+- TensorFlow
+- NumPy
+- A custom `memory` module for experience replay buffer management.
+
+This module is intended to be used with a ROS 2 + Gazebo environment for training or evaluating robotic control policies.
+"""
 
 import logging
 import argparse
@@ -40,13 +69,31 @@ parser.add_argument('-p', '--plot_results', action='store_true', default=False)
 class Model_CNN:
     def __init__(self, outputs, memorySize, discountFactor, learningRate, learnStart, img_rows, img_cols, img_channels):
         """
-        Parameters:
-            - outputs: output size
-            - memorySize: size of the memory that will store each state
-            - discountFactor: the discount factor (gamma)
-            - learningRate: learning rate
-            - learnStart: steps to happen before for learning. Set to 128
-        """
+    Convolutional Neural Network (CNN) model for control tasks using Q-learning.
+
+    This class implements a Deep Q-Network (DQN)-like agent for decision making 
+    based on image input. It supports training via experience replay, 
+    epsilon-greedy or probabilistic action selection, and target network updates.
+
+    Parameters
+    ----------
+    outputs : int
+        Number of discrete actions the agent can take (Q-value outputs).
+    memorySize : int
+        Capacity of the replay memory buffer.
+    discountFactor : float
+        Discount factor (gamma) for future rewards.
+    learningRate : float
+        Learning rate for the optimizer.
+    learnStart : int
+        Minimum number of experiences required before training begins.
+    img_rows : int
+        Height of the input image (in pixels).
+    img_cols : int
+        Width of the input image (in pixels).
+    img_channels : int
+        Number of channels in the input image (e.g., 3 for RGB).
+    """
         self.output_size = outputs
         self.memory = memory.Memory(memorySize)
         self.discountFactor = discountFactor
@@ -58,8 +105,6 @@ class Model_CNN:
         self.img_channels = img_channels
 
         self.network_outputs = 3
-
-
 
     def initNetworks(self):
         model = self.createModel()
@@ -85,19 +130,18 @@ class Model_CNN:
         #adam = Adam(lr=self.learningRate)
         #model.compile(loss='mse',optimizer=adam)
         '''
-        #model_CNN.compile(RMSprop(lr=self.learningRate), 'MSE')
-        #model.summary()
+        # model_CNN.compile(RMSprop(lr=self.learningRate), 'MSE')
+        # model.summary()
 
         model = Sequential()
-        model.add(Input(shape=(32,32,3)))
+        model.add(Input(shape=(32, 32, 3)))
         model.add(Lambda(lambda x: tf.image.rgb_to_grayscale(x))(input))
-        model.add(Conv2D(16, (3,3), strides=(2,2), activation='relu')) #input_shape=(32,32,1)))
+        # input_shape=(32,32,1)))
+        model.add(Conv2D(16, (3, 3), strides=(2, 2), activation='relu'))
         model.add(ZeroPadding2D((1, 1)))
-        model.add(Conv2D(16, (3,3), strides=(2,2), activation='relu'))
-        model.add(MaxPooling2D(pool_size=(2, 2), strides=(2,2)))
+        model.add(Conv2D(16, (3, 3), strides=(2, 2), activation='relu'))
+        model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
         model.add(Flatten())
-
-
 
         return model
 
@@ -105,7 +149,7 @@ class Model_CNN:
         i = 0
         for layer in self.model.layers:
             weights = layer.get_weights()
-            print("layer ",i,": ",weights)
+            print("layer ", i, ": ", weights)
             i += 1
 
     def backupNetwork(self, model, backup):
@@ -122,11 +166,10 @@ class Model_CNN:
     def updateTargetNetwork(self):
         self.backupNetwork(self.model, self.targetModel)
 
-
     # predict Q values for all the actions
+
     def getFlatObs(self, state):
         return self.model.predict(state)
-
 
     def getTargetQValues(self, state):
         predicted = self.targetModel.predict(state)
@@ -145,15 +188,15 @@ class Model_CNN:
         """
         if isFinal:
             return reward
-        else :
+        else:
             return reward + self.discountFactor * self.getMaxQ(qValuesNewState)
 
     # select the action with the highest Q value
     def selectAction(self, qValues, explorationRate):
         rand = random.random()
-        if rand < explorationRate :
+        if rand < explorationRate:
             action = np.random.randint(0, self.output_size)
-        else :
+        else:
             action = self.getMaxIndex(qValues)
         return action
 
@@ -197,8 +240,9 @@ class Model_CNN:
             miniBatch = self.memory.getMiniBatch(miniBatchSize)
 
             # ----- MAYBE BE a ISSUE HERE ---------------
-            X_batch = np.empty((1,self.img_rows,self.img_cols,self.img_channels), dtype = np.float64)
-            Y_batch = np.empty((1,self.output_size), dtype = np.float64)
+            X_batch = np.empty(
+                (1, self.img_rows, self.img_cols, self.img_channels), dtype=np.float64)
+            Y_batch = np.empty((1, self.output_size), dtype=np.float64)
             for sample in miniBatch:
                 isFinal = sample['isFinal']
                 state = sample['state']
@@ -209,17 +253,20 @@ class Model_CNN:
                 qValues = self.getQValues(state)
                 if useTargetNetwork:
                     qValuesNewState = self.getTargetQValues(newState)
-                else :
+                else:
                     qValuesNewState = self.getQValues(newState)
-                targetValue = self.calculateTarget(qValuesNewState, reward, isFinal)
+                targetValue = self.calculateTarget(
+                    qValuesNewState, reward, isFinal)
                 X_batch = np.append(X_batch, state.copy(), axis=0)
                 Y_sample = qValues.copy()
                 Y_sample[action] = targetValue
                 Y_batch = np.append(Y_batch, np.array([Y_sample]), axis=0)
                 if isFinal:
                     X_batch = np.append(X_batch, newState.copy(), axis=0)
-                    Y_batch = np.append(Y_batch, np.array([[reward]*self.output_size]), axis=0)
-            self.model.fit(X_batch, Y_batch, validation_split=0.2, batch_size = len(miniBatch), nb_epoch=1, verbose = 0)
+                    Y_batch = np.append(Y_batch, np.array(
+                        [[reward]*self.output_size]), axis=0)
+            self.model.fit(X_batch, Y_batch, validation_split=0.2,
+                           batch_size=len(miniBatch), nb_epoch=1, verbose=0)
 
     def saveModel(self, path):
         self.model.save(path)
@@ -227,8 +274,10 @@ class Model_CNN:
     def loadWeights(self, path):
         self.model.set_weights(load_model(path).get_weights())
 
+
 def detect_monitor_files(training_dir):
     return [os.path.join(training_dir, f) for f in os.listdir(training_dir) if f.startswith('openaigym')]
+
 
 def clear_monitor_files(training_dir):
     files = detect_monitor_files(training_dir)
@@ -236,7 +285,6 @@ def clear_monitor_files(training_dir):
         return
     for file in files:
         os.unlink(file)
-
 
 
 class ProbabilityDistribution(tf.keras.Model):
@@ -247,12 +295,12 @@ class ProbabilityDistribution(tf.keras.Model):
 
 class Model_A2C(tf.keras.Model):
     def __init__(self, num_actions):
-        super(Model_A2C,self).__init__(name='mlp_policy')
+        super(Model_A2C, self).__init__(name='mlp_policy')
         self.value_c = 0.5
         self.gamma = 0.99
         self.entropy_c = 1e-4
 
-        input = Input((32,32,3), name='policy_input')
+        input = Input((32, 32, 3), name='policy_input')
         '''
         # ------ CNN Part ------
         conv_1 = Conv2D(64, (3,3), strides=(2,2), activation='relu') (input)
@@ -263,11 +311,11 @@ class Model_A2C(tf.keras.Model):
         '''
         rgb2gray = Lambda(lambda x: tf.image.rgb_to_grayscale(x))(input)
         # ----- CNN Part (Optional) 1st run -----
-        conv1 = Conv2D(32, (4,4), strides=(2,2), activation='relu') (rgb2gray)
-        conv2 = Conv2D(64, (4,4), strides=(2,2), activation='relu') (conv1)
-        #zero_pad1 = ZeroPadding2D((1, 1)) (conv2)
-        conv3 = Conv2D(64, (3,3), strides=(2,2), activation='relu') (conv2)
-        max_pool = MaxPooling2D(pool_size=(2, 2), strides=(2,2)) (conv3)
+        conv1 = Conv2D(32, (4, 4), strides=(2, 2), activation='relu')(rgb2gray)
+        conv2 = Conv2D(64, (4, 4), strides=(2, 2), activation='relu')(conv1)
+        # zero_pad1 = ZeroPadding2D((1, 1)) (conv2)
+        conv3 = Conv2D(64, (3, 3), strides=(2, 2), activation='relu')(conv2)
+        max_pool = MaxPooling2D(pool_size=(2, 2), strides=(2, 2))(conv3)
 
         '''
         # ----- CNN Part (Optional) 2nd/3ird run -----
@@ -277,47 +325,45 @@ class Model_A2C(tf.keras.Model):
         max_pool = MaxPooling2D(pool_size=(2, 2), strides=(2,2)) (conv3)
         '''
 
-        drop1 = Dropout(0.2) (max_pool)
-        flat = Flatten() (drop1)
-        
+        drop1 = Dropout(0.2)(max_pool)
+        flat = Flatten()(drop1)
+
         # ------- A2C Part -------
         # Note: no tf.get_variable(), just simple Keras API!
-        #input_X = kl.Dense(480, activation='relu') (flat) #For Actor
-        #input_Cri = kl.Dense(240,  kernel_initializer='he_uniform',activation='relu') (flat) #For Critic
+        # input_X = kl.Dense(480, activation='relu') (flat) #For Actor
+        # input_Cri = kl.Dense(240,  kernel_initializer='he_uniform',activation='relu') (flat) #For Critic
 
         #  For Actor Action:
-        hidden1_Act = kl.Dense(64, activation='relu') (flat)
-        hidden2_Act = kl.Dense(400, activation='relu') (hidden1_Act)
-        hidden3_Act = kl.Dense(200, activation='relu') (hidden2_Act)
+        hidden1_Act = kl.Dense(64, activation='relu')(flat)
+        hidden2_Act = kl.Dense(400, activation='relu')(hidden1_Act)
+        hidden3_Act = kl.Dense(200, activation='relu')(hidden2_Act)
         # Logits are unnormalized log probabilities.
-        out_action = kl.Dense(num_actions, name='policy_logits1') (hidden3_Act)
+        out_action = kl.Dense(num_actions, name='policy_logits1')(hidden3_Act)
 
         #  For Critic Value:
-        hidden1_Cri = kl.Dense(64, activation='relu') (flat)
-        hidden2_Cri = kl.Dense(400, activation='relu') (hidden1_Cri)
-        hidden3_Cri = kl.Dense(200, activation='relu') (hidden2_Cri)
-        valueOut_Cri = kl.Dense(1, name='value') (hidden3_Cri)
-
+        hidden1_Cri = kl.Dense(64, activation='relu')(flat)
+        hidden2_Cri = kl.Dense(400, activation='relu')(hidden1_Cri)
+        hidden3_Cri = kl.Dense(200, activation='relu')(hidden2_Cri)
+        valueOut_Cri = kl.Dense(1, name='value')(hidden3_Cri)
 
         # ------ Create Network Model ------
-        self.network = Model(inputs=input, outputs=[out_action, valueOut_Cri]) # for value
-        #self.network.compile( optimizer=ko.RMSprop(lr=7e-3),loss=self._value_loss)
-        #self.network2 = Model(inputs=input, outputs=[mu_linear_output, mu_angle_output, std_output]) # for continous action
-        #self.network2.compile( optimizer=ko.RMSprop(lr=7e-3),loss=[self._logits_loss, 'MSE', 'MSE'])
+        self.network = Model(inputs=input, outputs=[
+                             out_action, valueOut_Cri])  # for value
+        # self.network.compile( optimizer=ko.RMSprop(lr=7e-3),loss=self._value_loss)
+        # self.network2 = Model(inputs=input, outputs=[mu_linear_output, mu_angle_output, std_output]) # for continous action
+        # self.network2.compile( optimizer=ko.RMSprop(lr=7e-3),loss=[self._logits_loss, 'MSE', 'MSE'])
 
         self.dist = ProbabilityDistribution()
 
-
     def call(self, inputs, **kwargs):
         # Inputs is a numpy array, convert to a tensor.
-        #x = tf.convert_to_tensor(inputs)
-        #print(kwargs.get("training") == True)
+        # x = tf.convert_to_tensor(inputs)
+        # print(kwargs.get("training") == True)
         # print(f"Shape of inputs (in call function): {inputs.shape}")
         # print(f"type of inputs (in call function): {type(inputs)}")
         if (inputs.shape.ndims == 3):
             inputs = tf.expand_dims(inputs, axis=0)
         return self.network(inputs)
-
 
 
 class A2CAgent:
@@ -330,14 +376,13 @@ class A2CAgent:
         self.model = model
 
         self.model.compile(
-        optimizer=ko.RMSprop(learning_rate=lr),
-        # Define separate losses for policy logits and value estimate.
-        loss=[self._logits_loss, self._value_loss])
-
+            optimizer=ko.RMSprop(learning_rate=lr),
+            # Define separate losses for policy logits and value estimate.
+            loss=[self._logits_loss, self._value_loss])
 
     def action_value(self, obs):
         # Executes `call()` under the hood.
-        #self.obs_temp[0] = obs
+        # self.obs_temp[0] = obs
 
         logits, value = self.model.predict_on_batch(obs)
 
@@ -348,19 +393,18 @@ class A2CAgent:
         # Will become clearer later why we don't use it.
         return action, value[0]
 
-
     def _returns_advantages(self, rewards, dones, values, next_value):
         # `next_value` is the bootstrap value estimate of the future state (critic).
         returns = np.append(np.zeros_like(rewards), next_value, axis=-1)
-        #OR returns = np.array(rewards + [next_value[0]])
-        #returns = np.zeros_like(rewards)
+        # OR returns = np.array(rewards + [next_value[0]])
+        # returns = np.zeros_like(rewards)
 
         # Returns are calculated as discounted sum of future rewards.
         for t in reversed(range(rewards.shape[0])):
-            returns[t] = rewards[t] + self.gamma * returns[t + 1] * (1 - dones[t])
+            returns[t] = rewards[t] + self.gamma * \
+                returns[t + 1] * (1 - dones[t])
 
         returns = returns[:-1]
-
 
         # Advantages are equal to returns - baseline (value estimates in our case).
         advantages = returns - values
@@ -374,18 +418,20 @@ class A2CAgent:
         # A trick to input actions and advantages through the same API.
         actions, advantages = tf.split(actions_and_advantages, 2, axis=-1)
         # ------ Edit Here For 2 Actions: ----------
-        #actions = actions_and_advantages[:,0:2]
-        #advantages = actions_and_advantages[:,2]
-        #print(  actions[:,0])
-        #print(logits)
+        # actions = actions_and_advantages[:,0:2]
+        # advantages = actions_and_advantages[:,2]
+        # print(  actions[:,0])
+        # print(logits)
 
         # Sparse categorical CE loss obj that supports sample_weight arg on `call()`.
         # `from_logits` argument ensures transformation into normalized probabilities.
-        weighted_sparse_ce = kls.SparseCategoricalCrossentropy(from_logits=True) # reduction=kls.Reduction.SUM)
+        weighted_sparse_ce = kls.SparseCategoricalCrossentropy(
+            from_logits=True)  # reduction=kls.Reduction.SUM)
         # Policy loss is defined by policy gradients, weighted by advantages.
         # Note: we only calculate the loss on the actions we've actually taken.
         actions = tf.cast(actions, tf.int32)
-        policy_loss = weighted_sparse_ce(actions, logits, sample_weight=advantages) # For Both Actions Now
+        policy_loss = weighted_sparse_ce(
+            actions, logits, sample_weight=advantages)  # For Both Actions Now
 
         # ------------------ REVIEW OVER ----------------
         # Entropy loss can be calculated as cross-entropy over itself.
@@ -394,8 +440,6 @@ class A2CAgent:
         # We want to minimize policy and maximize entropy losses.
         # Here signs are flipped because the optimizer minimizes.
         return (policy_loss) - self.entropy_c * entropy_loss
-
-
 
     def _logits_loss_ppo(self, old_logits, logits, actions, advs, n_actions):
         actions_oh = tf.one_hot(actions, n_actions)
