@@ -1,12 +1,13 @@
 """
 ROS 2 node to spawn 16 mobile robots (Hospitalbot) in a 4x4 grid, 100 units from (0, 0).
 """
+
 import os
-import sys
 import math
 import rclpy
 from ament_index_python.packages import get_package_share_directory
 from gazebo_msgs.srv import SpawnEntity
+
 
 def main():
     rclpy.init()
@@ -19,8 +20,11 @@ def main():
 
     # Path to robot SDF
     sdf_file_path = os.path.join(
-        get_package_share_directory("test_new_pkg_name"), "models",
-        "pioneer3at", "model.sdf")
+        get_package_share_directory("test_new_pkg_name"),
+        "models",
+        "pioneer3at",
+        "model.sdf",
+    )
 
     # 4x4 grid, 100 units from (0, 0), spaced by 5 units
     grid_size = 4
@@ -34,13 +38,13 @@ def main():
             namespace = f"hospitalbot_ns_{idx}"
 
             # Place robots in a grid, centered at (radius, radius)
-            x = radius + (i - (grid_size-1)/2) * spacing
-            y = radius + (j - (grid_size-1)/2) * spacing
+            x = radius + (i - (grid_size - 1) / 2) * spacing
+            y = radius + (j - (grid_size - 1) / 2) * spacing
             z = 0.0
 
             request = SpawnEntity.Request()
             request.name = name
-            with open(sdf_file_path, 'r') as f:
+            with open(sdf_file_path, "r") as f:
                 request.xml = f.read()
             request.robot_namespace = namespace
             request.initial_pose.position.x = x
@@ -48,8 +52,8 @@ def main():
             request.initial_pose.position.z = z
 
             desired_angle = math.radians(-90)
-            request.initial_pose.orientation.z = math.sin(desired_angle/2)
-            request.initial_pose.orientation.w = math.cos(desired_angle/2)
+            request.initial_pose.orientation.z = math.sin(desired_angle / 2)
+            request.initial_pose.orientation.w = math.cos(desired_angle / 2)
 
             node.get_logger().info(f"Spawning {name} at ({x:.2f}, {y:.2f}, {z:.2f})")
             future = client.call_async(request)
@@ -58,11 +62,13 @@ def main():
                 node.get_logger().info(f"Spawned {name}: {future.result()}")
             else:
                 node.get_logger().error(
-                    f"Exception while spawning {name}: {future.exception()}")
+                    f"Exception while spawning {name}: {future.exception()}"
+                )
 
     node.get_logger().info("All robots spawned. Shutting down node.")
     node.destroy_node()
     rclpy.shutdown()
+
 
 if __name__ == "__main__":
     main()
