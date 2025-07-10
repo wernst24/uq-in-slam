@@ -39,7 +39,7 @@ def generate_launch_description():
             package="test_new_pkg_name",
             executable="spawn_demo",
             arguments=[
-                "HospitalBot",
+                "p3at",
                 "demo",
                 "1",
                 "16.0",  # x position

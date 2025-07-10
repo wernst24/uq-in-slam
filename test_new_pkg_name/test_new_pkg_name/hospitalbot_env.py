@@ -116,11 +116,11 @@ class HospitalBotEnv(RobotController, Env):
         info = self._get_info()
 
         # check for crash
-        if any(info["laser"] < self._minimum_dist_from_obstacles):
-            reward -= 200
-            self.get_logger().info("CRASHED, reward = " + str(self._total_reward))
-            self._total_reward += reward
-            done = True
+        # if any(info["laser"] < self._minimum_dist_from_obstacles):
+        #     reward -= 200
+        #     self.get_logger().info("CRASHED, reward = " + str(self._total_reward))
+        #     self._total_reward += reward
+        #     done = True
             # debug
 
         # Check if episode is terminated

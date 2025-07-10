@@ -1,14 +1,12 @@
 from rclpy.node import Node
 from sensor_msgs.msg import LaserScan, Image
-import cv2
 from cv_bridge import CvBridge
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
 from std_srvs.srv import Empty
 from functools import partial
 import numpy as np
-import math
-from gazebo_msgs.srv import DeleteEntity, SpawnEntity, SetModelState, SetEntityState
+from gazebo_msgs.srv import SetEntityState
 import os
 from ament_index_python.packages import get_package_share_directory
 # from rclpy.callback_groups import ReentrantCallbackGroup, MutuallyExclusiveCallbackGroup
@@ -35,25 +33,27 @@ class RobotController(Node):
         - /delete_entity : unspawns the robot from the simulation
         - /spawn_entity : spawns the robot in the simulation in a semi-random position
     """
-    def __init__(self, instance_num=0):
+    def __init__(self, ns="demo", robo_name="p3at"):
         # using namespace to allow for multiple gazebo simulations to run in parallel
-        namespace_name = ""
-        super().__init__('robot_controller', namespace=namespace_name)
-        self.get_logger().info("The robot controller node has just been created")
+        self.namespace = ns
+        self.robot_name = robo_name
+        super().__init__(f'{robo_name}_controller_node', namespace=self.namespace)
+        self.get_logger().info(f'{robo_name} controller node has just been created')
 
         # Action publisher
-        self.action_pub = self.create_publisher(Twist, f'{namespace_name}/demo/cmd_vel', 10)
+        self.action_pub = self.create_publisher(Twist, f'/{self.namespace}/cmd_vel', 10)
         # Position subscriber
-        self.pose_sub = self.create_subscription(Odometry, f'{namespace_name}/demo/odom', self.pose_callback, 1)
+        self.pose_sub = self.create_subscription(Odometry, f'/{self.namespace}/odom', self.pose_callback, 1)
         # Laser subscriber
-        self.laser_sub = self.create_subscription(LaserScan, f'{namespace_name}/demo/laser/out', self.laser_callback, 1)
+        self.laser_sub = self.create_subscription(LaserScan, f'/{self.namespace}/laser/out', self.laser_callback, 1)
         self.bridge = CvBridge()
-        self.camera_sub = self.create_subscription(Image, f'{namespace_name}/demo/my_camera/image_raw', self.camera_callback, 1)
+        self.camera_sub = self.create_subscription(Image, f'/{self.namespace}/my_camera/image_raw', self.camera_callback, 1)
+        
         # Reset model state client - this resets the pose and velocity of a given model within the world
-        self.client_state = self.create_client(SetEntityState, f"{namespace_name}/demo/set_entity_state")
+        self.client_state = self.create_client(SetEntityState, f"/{self.namespace}/set_entity_state")
 
         # Reset simulation client - UNUSED
-        self.client_sim = self.create_client(Empty, f"{namespace_name}/reset_simulation")
+        # self.client_sim = self.create_client(Empty, f"/{self.namespace}/reset_simulation")
 
 
         # Get the directory of the sdf of the robot
@@ -120,7 +120,7 @@ class RobotController(Node):
     # Method that elaborates the future obtained by callig the call_set_robot_state_service method
     def callback_set_robot_state(self, future):
         try:
-            response= future.result()
+            _ = future.result()
             #self.get_logger().info("The Environment has been successfully reset")
             self._done_set_rob_state = True
         except Exception as e:
