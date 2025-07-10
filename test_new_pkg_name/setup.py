@@ -47,6 +47,7 @@ setup(
     entry_points={
         'console_scripts': [
           'spawn_demo = test_new_pkg_name.spawn_demo:main',
+          'spawn_4x4 = test_new_pkg_name.spawn_4x4:main',
           'start_training = test_new_pkg_name.start_training:main',
           'trained_agent = test_new_pkg_name.trained_agent:main',
           'random_agent = test_new_pkg_name.random_agent:main',
