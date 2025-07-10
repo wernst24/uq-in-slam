@@ -11,7 +11,7 @@ from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
     ld = LaunchDescription()
-    world_file_name = "circuit_4x4.world"
+    world_file_name = "4x4_slow_circuit.world"
     pkg_dir = get_package_share_directory("test_new_pkg_name")
 
     os.environ["GAZEBO_MODEL_PATH"] = os.path.join(pkg_dir, "models")

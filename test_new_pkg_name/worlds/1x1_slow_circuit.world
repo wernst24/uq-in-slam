@@ -1,10 +1,20 @@
-<?xml version="1.0" ?>
-<sdf version='1.5'>
-<world name='circle'>
-  
+<sdf version='1.4'>
+  <world name='default'>
+
+    <plugin name="gazebo_ros_state" filename="libgazebo_ros_state.so">
+      <ros>
+        <namespace>/demo</namespace>
+        <remapping>model_states:=model_states_demo</remapping>
+        <remapping>link_states:=link_states_demo</remapping>
+      </ros>
+      <update_rate>1.0</update_rate>
+    </plugin>
+
+
+
     <light name='sun' type='directional'>
       <cast_shadows>1</cast_shadows>
-      <pose>0 0 100 0 -0 0</pose>
+      <pose>0 0 10 0 -0 0</pose>
       <diffuse>0.8 0.8 0.8 1</diffuse>
       <specular>0.2 0.2 0.2 1</specular>
       <attenuation>
@@ -15,8 +25,7 @@
       </attenuation>
       <direction>0.5 0.1 -0.9</direction>
     </light>
-    
-    <model name='ground'>
+        <model name='ground_plane'>
       <static>1</static>
       <link name='link'>
         <collision name='collision'>
@@ -64,15 +73,32 @@
         <gravity>1</gravity>
       </link>
     </model>
-
+    <scene>
+      <ambient>0.4 0.4 0.4 1</ambient>
+      <background>0.7 0.7 0.7 1</background>
+      <shadows>0</shadows>
+    </scene>
+    <physics type='ode'>
+      <max_step_size>0.01</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>100</real_time_update_rate>
+      <gravity>0 0 -9.8</gravity>
+    </physics>
+    <state world_name='default'>
+      <sim_time>0 0</sim_time>
+      <real_time>0 44986</real_time>
+      <wall_time>1377677575 940727583</wall_time>
+    </state>
+    <gui fullscreen='0'>
+      <camera name='user_camera'>
+        <pose>2.6 -1.69 12.2 0 1.56 3.14</pose>
+        <view_controller>orbit</view_controller>
+      </camera>
+    </gui>
+    <!-- A simple circuit -->
     <include>
-      <uri>model://Target</uri>
-      <pose>0 0 0.05 0 0 0</pose>
+      <uri>model://Circuit_ql_1</uri>
+      <pose>2.4 -2.1 0 0 0 0</pose>
     </include>
-
-    <plugin name="ardupilot_sitl_gazebo_plugin" filename="libardupilot_sitl_gazebo_plugin.so">
-    <UAV_MODEL>erlecopter</UAV_MODEL>
-    </plugin>
-
   </world>
 </sdf>

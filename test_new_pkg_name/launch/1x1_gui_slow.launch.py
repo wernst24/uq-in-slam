@@ -12,7 +12,7 @@ from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
     ld = LaunchDescription()
-    world_file_name = "circuit.world"
+    world_file_name = "1x1_slow_circuit.world"
     pkg_dir = get_package_share_directory("test_new_pkg_name")
 
     os.environ["GAZEBO_MODEL_PATH"] = os.path.join(pkg_dir, "models")
@@ -34,7 +34,7 @@ def generate_launch_description():
         )
     )
 
-    ld.append(
+    ld.add_action(
         Node(
             package="test_new_pkg_name",
             executable="spawn_demo",
@@ -48,4 +48,4 @@ def generate_launch_description():
             output="screen",
         )
     )
-    return LaunchDescription(ld)
+    return ld

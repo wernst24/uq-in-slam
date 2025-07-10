@@ -79,9 +79,9 @@
       <shadows>0</shadows>
     </scene>
     <physics type='ode'>
-      <max_step_size>0.005</max_step_size>
+      <max_step_size>0.01</max_step_size>
       <real_time_factor>1</real_time_factor>
-      <real_time_update_rate>200</real_time_update_rate>
+      <real_time_update_rate>100</real_time_update_rate>
       <gravity>0 0 -9.8</gravity>
     </physics>
     <state world_name='default'>
@@ -95,10 +95,93 @@
         <view_controller>orbit</view_controller>
       </camera>
     </gui>
-    <!-- A simple circuit -->
+    <!-- 4x4 grid of Circuit_ql_1 -->
+    <!-- Row 0 -->
     <include>
       <uri>model://Circuit_ql_1</uri>
-      <pose>2.4 -2.1 0 0 0 0</pose>
+      <name>Circuit_ql_1_0_0</name>
+      <pose>0 0 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://Circuit_ql_1</uri>
+      <name>Circuit_ql_1_0_1</name>
+      <pose>10 0 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://Circuit_ql_1</uri>
+      <name>Circuit_ql_1_0_2</name>
+      <pose>20 0 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://Circuit_ql_1</uri>
+      <name>Circuit_ql_1_0_3</name>
+      <pose>30 0 0 0 0 0</pose>
+    </include>
+
+    <!-- Row 1 -->
+    <include>
+      <uri>model://Circuit_ql_1</uri>
+      <name>Circuit_ql_1_1_0</name>
+      <pose>0 10 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://Circuit_ql_1</uri>
+      <name>Circuit_ql_1_1_1</name>
+      <pose>10 10 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://Circuit_ql_1</uri>
+      <name>Circuit_ql_1_1_2</name>
+      <pose>20 10 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://Circuit_ql_1</uri>
+      <name>Circuit_ql_1_1_3</name>
+      <pose>30 10 0 0 0 0</pose>
+    </include>
+
+    <!-- Row 2 -->
+    <include>
+      <uri>model://Circuit_ql_1</uri>
+      <name>Circuit_ql_1_2_0</name>
+      <pose>0 20 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://Circuit_ql_1</uri>
+      <name>Circuit_ql_1_2_1</name>
+      <pose>10 20 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://Circuit_ql_1</uri>
+      <name>Circuit_ql_1_2_2</name>
+      <pose>20 20 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://Circuit_ql_1</uri>
+      <name>Circuit_ql_1_2_3</name>
+      <pose>30 20 0 0 0 0</pose>
+    </include>
+
+    <!-- Row 3 -->
+    <include>
+      <uri>model://Circuit_ql_1</uri>
+      <name>Circuit_ql_1_3_0</name>
+      <pose>0 30 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://Circuit_ql_1</uri>
+      <name>Circuit_ql_1_3_1</name>
+      <pose>10 30 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://Circuit_ql_1</uri>
+      <name>Circuit_ql_1_3_2</name>
+      <pose>20 30 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://Circuit_ql_1</uri>
+      <name>Circuit_ql_1_3_3</name>
+      <pose>30 30 0 0 0 0</pose>
     </include>
   </world>
 </sdf>

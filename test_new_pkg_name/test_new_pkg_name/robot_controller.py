@@ -37,7 +37,7 @@ class RobotController(Node):
     """
     def __init__(self, instance_num=0):
         # using namespace to allow for multiple gazebo simulations to run in parallel
-        namespace_name = f"/simulation_{instance_num}"
+        namespace_name = ""
         super().__init__('robot_controller', namespace=namespace_name)
         self.get_logger().info("The robot controller node has just been created")
 
