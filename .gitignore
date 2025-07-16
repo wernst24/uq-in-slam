@@ -2,9 +2,10 @@
 .vscode/
 
 # ROS 2 colcon build artifacts
-build/
-install/
-log/
+**/build/
+**/install/
+**/log/
+**/logs/
 
 # Python bytecode
 __pycache__/
