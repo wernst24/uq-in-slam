@@ -26,6 +26,7 @@
   <depend>gymnasium</depend>
   <depend>numpy</depend>
   <depend>math</depend>
+  <depend>xacro</depend>
 
 
   <test_depend>ament_copyright</test_depend>

@@ -1,0 +1,14 @@
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:arg name="prefix" default="robot1_"/>
+  <xacro:arg name="namespace" default="robot1"/>
+  <xacro:arg name="collide_bitmask" default="0x01"/>
+  <xacro:arg name="visible" default="false"/>
+
+  <xacro:include filename="$(find uqslam)/pioneer3at/model.sdf.xacro"/>
+
+  <xacro:pioneer3at
+    prefix="${prefix}"
+    namespace="${namespace}"
+    collide_bitmask="${collide_bitmask}"
+    visible="${visible}"/>
+</robot>
