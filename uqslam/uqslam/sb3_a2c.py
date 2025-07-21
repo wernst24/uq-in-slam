@@ -3,7 +3,7 @@
 import rclpy
 from rclpy.node import Node
 from gymnasium.envs.registration import register
-from uqslam.uqslam.hospitalbot_env import HospitalBotEnv
+from uqslam.p3at_fast_control_env import P3atFastControlEnv
 import gymnasium as gym
 from stable_baselines3 import A2C
 from stable_baselines3.common.torch_layers import BaseFeaturesExtractor

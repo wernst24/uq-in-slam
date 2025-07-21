@@ -6,7 +6,7 @@ from uqslam.robot_controller import RobotController
 import math
 
 
-class HospitalBotEnv(RobotController, Env):
+class P3atFastControlEnv(RobotController, Env):
     """
     This class defines the RL environment. Here are defined:
         - Action space

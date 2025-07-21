@@ -1,7 +1,7 @@
 import rclpy
 import gymnasium as gym
-from uqslam.uqslam.p3at_circuit_env import HospitalBotEnv
-# import cv2
+from uqslam.p3at_slow_control_env import P3atSlowControlEnv
+import argparse
 
 
 class TrainingNode(rclpy.node.Node):
@@ -12,23 +12,20 @@ class TrainingNode(rclpy.node.Node):
 
 
 def main(args=None):
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--repeat_steps", type=int, default=4, help="Number of times to repeat each action (slower control frequency)")
+    parser.add_argument("--episodes", type=int, default=10, help="Number of episodes to run")
+    parsed_args = parser.parse_args()
+
     rclpy.init()
     node = TrainingNode()
     node.get_logger().info("Random agent node has been created")
 
-    # register gymnasium env created in hospitalbot_env module
-    gym.envs.registration.register(
-            id="HospitalBotEnv-v0",
-            entry_point="uqslam.hospitalbot_env:HospitalBotEnv",
-            max_episode_steps=3000,
-    )
+    # Use the slower control frequency environment
+    env = P3atSlowControlEnv(repeat_steps=parsed_args.repeat_steps)
+    node.get_logger().info(f"Using P3atSlowControlEnv with repeat_steps={parsed_args.repeat_steps}")
 
-    node.get_logger().info("The environment has been registered")
-
-    env = gym.make("HospitalBotEnv-v0")
-    # old code checks env here
-    # number of episodes
-    episodes = 10
+    episodes = parsed_args.episodes
     # execute random agent
     node.get_logger().info("Starting the RANDOM AGENT now")
     for ep in range(episodes):
@@ -36,12 +33,9 @@ def main(args=None):
         done = False
         while not done:
             obs, reward, done, truncated, info = env.step(env.action_space.sample())
-            # node.get_logger().info(f"shape of obs: {obs.shape}")
-            # should log agent state and reward
+            # Optionally log agent state and reward here
 
-            # while cv2.waitKey(1) != ord('q'):
-            #   cv2.imshow("[DEBUG] /demo/my_camera/image_raw", obs)
-            # cv2.destroyAllWindows()
+    env.close()
 
 
 if __name__ == "__main__":

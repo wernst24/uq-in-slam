@@ -6,7 +6,7 @@ Each robot is assumed to be spawned with namespace 'hospitalbot_ns_{idx}' (idx: 
 import rclpy
 import numpy as np
 from gymnasium.vector import VectorEnv
-from uqslam.uqslam.hospitalbot_env import HospitalBotEnv
+from uqslam.p3at_fast_control_env import P3atFastControlEnv
 
 class HospitalBotVecEnv(VectorEnv):
     def __init__(self, num_envs=16):
