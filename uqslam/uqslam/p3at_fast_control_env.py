@@ -29,7 +29,7 @@ class P3atFastControlEnv(RobotController, Env):
         - call_reset_simulation_service: resets the simulation
         - call_reset_robot_service: resets the robot position to desired position
     """
-    def __init__(self, instance_num=0):
+    def __init__(self):
 
         # Initialize the Robot Controller Node
         super().__init__()
@@ -65,7 +65,7 @@ class P3atFastControlEnv(RobotController, Env):
         self._num_steps = 0
 
         # max steps for truncate
-        self._max_num_steps = 300
+        self._max_num_steps = 3000
 
         # episodes
         self._num_episodes = 0

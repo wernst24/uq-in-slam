@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Argument must be declared before anything else uses it -->
+  <xacro:arg name="speedup" default="false"/>
+
+  <!-- Generate SDF block as a macro (required because root must be <robot>) -->
+  <xacro:macro name="generate_sdf" params="">
+    <sdf version="1.6">
+      <world name="default">
+
+        <physics name="default_physics" type="ode">
+          <real_time_update_rate>
+            <xacro:if value="$(arg speedup)">1000.0</xacro:if>
+            <xacro:unless value="$(arg speedup)">100.0</xacro:unless>
+          </real_time_update_rate>
+        </physics>
+
+      </world>
+    </sdf>
+  </xacro:macro>
+
+  <!-- Invoke the macro to emit the actual world -->
+  <xacro:generate_sdf/>
+
+</robot>

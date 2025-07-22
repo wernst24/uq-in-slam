@@ -28,10 +28,10 @@ setup(
         # Path to the mobile robot sdf and config file
         (os.path.join('share', package_name,'models/mobile_warehouse_robot/'), glob('./models/mobile_warehouse_robot/*')),
         
-        # Path to the pioneer sdf file
+        # Path to the pioneer sdf and xacro files
         (os.path.join('share', package_name,'models/pioneer3at/'), glob('./models/pioneer3at/model.sdf')),
-
-        # Path to the pioneer config file
+        (os.path.join('share', package_name,'models/pioneer3at/'), glob('./models/pioneer3at/model.sdf.xacro')),
+        (os.path.join('share', package_name,'models/pioneer3at/'), glob('./models/pioneer3at/pioneer3at.xacro')),
         (os.path.join('share', package_name,'models/pioneer3at/'), glob('./models/pioneer3at/model.config')),
 
         # Path to the world file (i.e. warehouse + global environment)
@@ -47,7 +47,7 @@ setup(
     entry_points={
         'console_scripts': [
           f'spawn_demo = {package_name}.spawn_demo:main',
-          f'spawn_4x4 = {package_name}.spawn_4x4:main',
+          f'spawn_robot_param = {package_name}.spawn_robot_param:main',
           f'start_training = {package_name}.start_training:main',
           f'trained_agent = {package_name}.trained_agent:main',
           f'random_agent = {package_name}.random_agent:main',
