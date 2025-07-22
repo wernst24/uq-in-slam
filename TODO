@@ -1,0 +1,34 @@
+todo:
+Usually, dir structure is like:
+<workspace_name>
+        |-- build/
+        |-- install/
+        |-- log/
+        |-- src/
+              |-- <package_name>/
+                        |-- config/
+                        |-- launch/
+                        |-- src/
+                        |-- models/
+                        |-- worlds/
+                        |-- package.xml
+                        |-- setup.py
+                        |-- [etc]
+
+but currently, ours looks like:
+<workspace_name>
+        |-- build/
+        |-- install/
+        |-- log/
+        |-- src/
+              |-- uq-in-slam/
+                        |-- uqslam/
+                               |-- launch/
+                               |-- src/
+                               |-- models/
+                               |-- worlds/
+                               |-- package.xml
+                               |-- setup.py
+                               |-- [etc]
+
+The extra directory level `uq-in-slam/` adds unnecessary nesting and should be removed so that `uqslam/` lives directly under `src/`.
