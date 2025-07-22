@@ -1,11 +1,12 @@
 #!/usr/bin/env python
-
+''' Code Dump from Dr Dera's Repo'''
 import logging
 import argparse
 
 import numpy as np
 import os
 import random
+import wandb
 
 import time
 from distutils.dir_util import copy_tree
@@ -157,7 +158,9 @@ class Actor_VDP(tf.keras.Model):
         mu, sigma = self.conv_10(mu, sigma)
         mu, sigma = self.elu_1(mu, sigma)
         #mu, sigma = self.batch_norm(mu, sigma)
+
         #mu, sigma = self.maxpooling_5(mu, sigma)
+        #mu, sigma = self.dropout_1(mu, sigma, Training=training)
 
 
         # ---------- Critic Part ---------------
@@ -171,7 +174,7 @@ class Actor_VDP(tf.keras.Model):
 
         # ----------- Actor Part --------------
         mu_linear_out_act, Sigma_linear_out_act = self.fc_linear_actor(mu, sigma)
-        mu_linear_out_act, Sigma_linear_out_act = self.mysoftma(mu_linear_out_act, Sigma_linear_out_act)
+        #mu_linear_out_act, Sigma_linear_out_act = self.mysoftma(mu_linear_out_act, Sigma_linear_out_act)
         
 
         # Set Range for actions (Linear and Angle)
@@ -241,9 +244,11 @@ class Critic_CNN(tf.keras.Model):
         hidLay = self.inputLay(inputs)
         hidLay = self.conv1(hidLay)
         hidLay = self.conv2(hidLay)
-
+        #hidLay = self.act1(hidLay)
         #hidLay = self.zero_pad1(hidLay)
 
+        
+        #hidLay = self.act2(hidLay)
         hidLay = self.conv3(hidLay)
         hidLay = self.max_pool(hidLay)
         hidLay = self.drop1(hidLay)
@@ -303,6 +308,8 @@ class Critic_CNN(tf.keras.Model):
         return value
 '''
 
+
+
 class A2CAgent:
     def __init__(self, model_Act, model_Cri, lr=7e-3, gamma=0.99, value_c=0.5, entropy_c=1e-4):
         # `gamma` is the discount factor; coefficients are used for the loss terms.
@@ -311,29 +318,98 @@ class A2CAgent:
         self.entropy_c = entropy_c
 
         learning_rate_fn = tf.keras.optimizers.schedules.PolynomialDecay(initial_learning_rate=0.0002, decay_steps=100000,  end_learning_rate=0.0001, power=40.)
-        self.optimizer_actor = tf.keras.optimizers.SGD(learning_rate=learning_rate_fn) # , clipnorm=1.0)
+        self.optimizer_actor = tf.keras.optimizers.SGD(learning_rate=learning_rate_fn)  # , clipnorm=1.0)
 
-        self.optimizer_critic = tf.keras.optimizers.Adam(learning_rate=lr)
-        #self.optimizer_critic = tf.keras.optimizers.RMSprop(learning_rate=lr)
+        #self.optimizer_critic = tf.keras.optimizers.Adam(learning_rate=lr)
+        self.optimizer_critic = tf.keras.optimizers.RMSprop(learning_rate=lr)
         #self.optimizer_critic = tf.keras.optimizers.SGD(learning_rate=lr)
         #self.optimizer_critic = ko.RMSprop(lr)
         
         self.model_Act = model_Act
         self.model_Cri = model_Cri
+        self.con = 0.1
 
-        self.old_neg_log_prob = 0
+        self.adv_perturbations = np.zeros([int(1000000 / (1)), 1, 32, 32,1])
+        self.test_no_steps = 0
+        self.epsilon = 0.05
+        self.weighted_sparse_ce = kls.SparseCategoricalCrossentropy(from_logits=True) # reduction=kls.Reduction.SUM)
+
+        self.mu_out_ = np.zeros([int(1000000 / (1)), 1, 3])
+        self.sigma_ = np.zeros([int(1000000 / (1)), 1, 3, 3])
+        self.true_x = np.zeros([int(1000000 / (1)), 1, 32, 32, 1])
+
+        self.var = np.zeros([int(1 /1) ,1])
+        self.snr_signal = np.zeros([int(1 /1) ,1])
 
         #self.model.compile(
         #optimizer=ko.RMSprop(lr=lr),
         # Define separate losses for policy logits and value estimate.
         #loss=[self._logits_loss_mu, self._logits_loss_sigma, self._value_loss])
 
+    @tf.function    
+    def create_adversarial_pattern(self, input_image):
+        with tf.GradientTape() as tape:
+            tape.watch(input_image)
+            self.model_Act.trainable = False
+
+
+            prediction, sigma = self.model_Act(input_image)
+            action = self.model_Act.dist(prediction)[0]
+            policy_loss = self.weighted_sparse_ce(action, prediction) #, sample_weight=advantages)
+
+            encodeAction = tf.one_hot(action,3)
+            #encodeAction = tf.cast(encodeAction, tf.int32)
+
+            loss_final = nll_gaussian(encodeAction, prediction,  tf.clip_by_value(t=sigma, clip_value_min=tf.constant(-1e+3), clip_value_max=tf.constant(1e+3)), 3 , 16)                         
+            loss = 0.5 * loss_final + policy_loss
+        # Get the gradients of the loss w.r.t to the input image.
+        gradient = tape.gradient(loss, input_image)
+        gradient = tf.where(tf.math.is_nan(gradient),  tf.constant(1.0e-6, shape=gradient.shape), tf.cast(gradient, tf.float32) )
+        gradient = tf.where(tf.math.is_inf(gradient),  tf.constant(1.0e-6, shape=gradient.shape), gradient)          
+        # Get the sign of the gradients to create the perturbation
+        signed_grad = tf.sign(gradient)
+        return signed_grad
+
+    @tf.function
+    def test_on_batch(self,x):  
+        self.model_Act.trainable = False                    
+        mu_out, sigma = self.model_Act(x, training=False)            
+        return mu_out, sigma
+
+    @tf.function
+    def test_on_batch_dist(self,x):  
+        self.model_Act.dist.trainable = False                    
+        action = self.model_Act.dist(x, training=False)            
+        return action
+
+
+    @tf.function
+    def test_on_batch_cri(self,x):  
+        self.model_Cri.trainable = False                    
+        val = self.model_Cri(x, training=False)            
+        return val
 
     def action_value(self, obs):
         # Executes `call()` under the hood.
-        mu_action, sig_action = self.model_Act.predict_on_batch(obs)
+
+
+        #Adversarial Attack:
+        #self.adv_perturbations[self.test_no_steps, :, :, :] = self.create_adversarial_pattern(obs)
+        #adv_x = obs + self.epsilon * self.adv_perturbations[self.test_no_steps, :, :, :]
+        #adv_x = tf.clip_by_value(adv_x, 0.0, 1.0)
+
+
+        #Gaussian:
+        gauss = np.random.normal(0, 0.001, obs.shape)
+        gauss = gauss.reshape(obs.shape)
+        gauss_obs = obs + gauss
+
+
+        mu_action, sig_action = self.test_on_batch(gauss_obs)
         #action = self.model_Act.dist.predict_on_batch(mu_action)[0]
-        value = self.model_Cri.predict_on_batch(obs)
+        action = self.test_on_batch_dist(mu_action)[0]
+
+        value = self.test_on_batch_cri(gauss_obs)
 
 
         print("yayyy")
@@ -341,21 +417,26 @@ class A2CAgent:
         print(sig_action)
         print(value)
         print("yayyy22")
+
+        mu_action = mu_action.numpy()
+        sig_action = sig_action.numpy()
         
         act_mu = mu_action[0]
         #act_sig = sig_action[0]
 
         uncert_sig = np.diag( sig_action[0] )
         #uncert_sig_cpy = np.arange(3)
-        certain = uncert_sig.argmin()
-        #uncertain = uncert_sig.argmax()
 
-        action = act_mu.argmax()
+        certain = uncert_sig.argmin() # Certain about class
+        uncertain = uncert_sig.argmax() # Uncertain about class
+
+        #uncertain = uncert_sig.argmax()
+        actionMax = act_mu.argmax()
         
         # Threshold for Uncertainty for Action
         if uncert_sig[action] > 0.3:
 
-            #second_high_mu = np.argpartition(act_mu.flatten(), -2)[-2]
+            second_high_mu = np.argpartition(act_mu.flatten(), -2)[-2]
 
             #if uncert_sig[actionMax] < 0.3:
             #    action = actionMax
@@ -364,15 +445,26 @@ class A2CAgent:
             if uncert_sig[certain] < 0.3:  #and act_mu[certain] > 0.05:
                 action = certain
 
-            #if (action != actionMax): #and (not check_bool_uncert):
-            #    if uncert_sig[actionMax] < 0.3:
-            #        action = actionMax
+            if (action != actionMax): #and (not check_bool_uncert):
+                if uncert_sig[actionMax] < 0.3:
+                    action = actionMax
 
-        #print(uncert_sig)
-        #print(uncert_sig_cpy)
         print(action)
+        
+        self.true_x[self.test_no_steps, :, :, :] = obs
+        self.mu_out_[self.test_no_steps, :, :] = mu_action
+        self.sigma_[self.test_no_steps, :, :, :] = sig_action
+        self.test_no_steps += 1
 
-        return action, value[0][0]
+        for i in range(1):
+            for j in range(1):               
+                predicted_out = np.argmax(self.mu_out_[i,j,:])
+                self.var[i,j] = self.sigma_[i,j, int(predicted_out), int(predicted_out)]
+                self.snr_signal[i,j] = 10*np.log10( np.sum(np.square(self.true_x[i,j,:, :,:]))/np.sum( np.square( gauss ) )) #self.epsilon*self.adv_perturbations[i, j, :, :, :]  ) ))
+        
+
+
+        return action, value[0][0], self.snr_signal, uncert_sig[uncertain]*self.con, uncert_sig[certain]*self.con, self.var #,act_mu, uncert_sig
 
     def _returns_advantages(self, rewards, dones, values, next_value):
         # `next_value` is the bootstrap value estimate of the future state (critic).
@@ -385,10 +477,14 @@ class A2CAgent:
             returns[t] = rewards[t] + self.gamma * returns[t + 1] * (1 - dones[t])
 
         returns = returns[:-1]
-
+        '''
+        print(returns)
+        print("breakMain")
+        print(values)
+        '''
         # Advantages are equal to returns - baseline (value estimates in our case). TD Formula
         advantages = returns - values
-
+        print(advantages)
         return returns, advantages
 
 
@@ -449,50 +545,46 @@ class A2CAgent:
 
     @tf.function  # Make it fast.
     def train_on_batch_actor(self, x, actions, advs):
-
         #actions, advantages = tf.split(y, 2, axis=-1)
         actions = tf.cast(actions, tf.int32)
         encodeActions = tf.one_hot(actions,3)
+
         advs = tf.cast(advs, tf.float32)
         encodeActions = tf.cast(encodeActions, tf.int32)
 
+        # Sparse categorical CE loss obj that supports sample_weight arg on `call()`.
+        # `from_logits` argument ensures transformation into normalized probabilities.
+        weighted_sparse_ce = kls.SparseCategoricalCrossentropy(from_logits=False) # reduction=kls.Reduction.SUM)
+        
 
         with tf.GradientTape() as tape: # Actor
             mu_out, sigma = self.model_Act(x, training=True)
-            self.model_Act.trainable = True
-
-            # Sparse categorical CE loss obj that supports sample_weight arg on `call()`.
-            # `from_logits` argument ensures transformation into normalized probabilities.
-            weighted_sparse_ce = kls.SparseCategoricalCrossentropy(from_logits=False) # reduction=kls.Reduction.SUM)
-
-
-            policy_loss1 = weighted_sparse_ce(actions, mu_out, sample_weight=advs)
-            #policy_loss2 = weighted_sparse_ce(encodeActions, sigma, sample_weight=advs)
+            
+            policy_loss = weighted_sparse_ce(actions, mu_out, sample_weight=advs)
             #neg_log_prob = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=mu_out,labels=actions)
             #neg_log_prob2 = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=sigma,labels=encodeActions)
             #ratio = tf.exp(neg_log_prob - self.old_neg_log_prob)
             #surrogate_loss = tf.reduce_mean(-ratio*advs )
             #surrogate_loss = tf.reduce_mean(neg_log_prob*advs)
-
-            #action_probs = tf.math.log(mu_out)
-            #actor_loss = -tf.math.reduce_sum(action_probs*advs)
-
             #probs = tf.nn.softmax(mu_out)
-            #entropy_loss = kls.categorical_crossentropy(probs, probs)
+            entropy_loss = kls.categorical_crossentropy(mu_out, mu_out)
 
+
+            self.model_Act.trainable = True
             loss_final = nll_gaussian(encodeActions, mu_out, tf.clip_by_value(t=sigma, clip_value_min=tf.constant(-1e+5),
-                                   clip_value_max=tf.constant(1e+5)), num_labels=3 , batch_size=16, advs=advs)
+                                   clip_value_max=tf.constant(1e+5)), num_labels=3 , batch_size=16)
             regularization_loss=tf.math.add_n(self.model_Act.losses)
             kl_factor = 10e-4
-            loss =  0.5*(loss_final + kl_factor*regularization_loss) + tf.math.reduce_mean( policy_loss1 )#+ tf.math.reduce_mean(self.entropy_c * entropy_loss)
+            loss = 0.5 * ((loss_final + kl_factor*regularization_loss))
 
+        #self.old_neg_log_prob = neg_log_prob
 
         # ---- For Actor weights ----
         gradients = tape.gradient(loss, self.model_Act.trainable_weights)
         #gradients, _ = tf.clip_by_global_norm(tape.gradient(loss, self.model_Act.trainable_weights), 2.0)
 
         #gradients, _ = tf.clip_by_value(tape.gradient(loss, self.model_Act.trainable_weights), clip_value_min=-1.0, clip_value_max=1.0)
-        #gradients = [(tf.clip_by_value(grad, clip_value_min=-2.0, clip_value_max=2.0)) for grad in gradients]
+        gradients = [(tf.clip_by_value(grad, clip_value_min=-2.0, clip_value_max=2.0)) for grad in gradients]
         #gradients = [(tf.clip_by_norm(grad, clip_norm=2.0)) for grad in gradients]
 
         gradients = [(tf.where(tf.math.is_nan(grad), tf.constant(1.0e-5, shape=grad.shape), grad)) for grad in gradients]
@@ -500,8 +592,7 @@ class A2CAgent:
 
         self.optimizer_actor.apply_gradients(zip(gradients, self.model_Act.trainable_weights)) 
 
-        return loss #, mu_out, sigma, gradients
-
+        return loss, mu_out, sigma, gradients
 
 
     @tf.function  # Make it fast.
@@ -514,18 +605,20 @@ class A2CAgent:
             loss = self._value_loss(returns, val) #tf.stop_gradient(returns), val)
 
         gradients = tape.gradient(loss, self.model_Cri.trainable_weights)
-        #gradients = [(tf.clip_by_value(grad, clip_value_min=-1.2, clip_value_max=1.2)) for grad in gradients]
+        gradients = [(tf.clip_by_value(grad, clip_value_min=-2.0, clip_value_max=2.0)) for grad in gradients]
 
         self.optimizer_critic.apply_gradients(zip(gradients, self.model_Cri.trainable_weights))
 
-        return loss #, val, gradients
+        return loss, val, gradients
 
 
 
-def nll_gaussian(y_test, y_pred_mean, y_pred_sd, num_labels, batch_size, advs):
+
+def nll_gaussian(y_test, y_pred_mean, y_pred_sd, num_labels, batch_size):
     y_pred_sd_ns = tf.cast(y_pred_sd, tf.float32)
     y_test = tf.cast(y_test, tf.float32)
     y_pred_mean = tf.cast(y_pred_mean, tf.float32)
+    #advs = tf.cast(advs, tf.float32)
 
     s, u, v = tf.linalg.svd(y_pred_sd_ns, full_matrices=True, compute_uv=True)  
     s_ = s + 1.0e-3
@@ -539,4 +632,4 @@ def nll_gaussian(y_test, y_pred_mean, y_pred_sd, num_labels, batch_size, advs):
     loss = tf.math.reduce_mean(tf.math.add(loss1,loss2))
     loss = tf.where(tf.math.is_nan(loss), tf.zeros_like(loss), loss)
     loss = tf.where(tf.math.is_inf(loss), tf.zeros_like(loss), loss)
-    return loss 
+    return loss #*advs

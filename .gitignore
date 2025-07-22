@@ -24,3 +24,6 @@ notes.txt
 # Python packaging
 *.egg-info/
 dist/
+
+# logs
+logs/

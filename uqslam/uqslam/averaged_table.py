@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+''' Code Dump from Dr Dera's Repo ("utilities/")'''
+
 '''
 This script creates a simple table from environemnt monitoring 
 data obtained from '/tmp/gazebo_gym_experiments/', which has been 
@@ -43,5 +45,5 @@ if __name__ == '__main__':
     print ("Printing averaged graph with interval="+str(mod1)+" ...")
     print ("----------------")
     for i, val in enumerate(avg_data):
-        print str(i*mod1)+"-"+str(i*mod1+mod1)+" | "+str(val)
+      print (str(i*mod1)+"-"+str(i*mod1+mod1)+" | "+str(val))
     print ("----------------")
