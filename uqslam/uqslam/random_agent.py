@@ -1,6 +1,6 @@
 import rclpy
-import gymnasium as gym
 from uqslam.p3at_slow_control_env import P3atSlowControlEnv
+from uqslam.p3at_vec_env import P3atVecEnv
 import argparse
 
 
@@ -22,20 +22,20 @@ def main(args=None):
     node.get_logger().info("Random agent node has been created")
 
     # Use the slower control frequency environment
-    env = P3atSlowControlEnv(repeat_steps=parsed_args.repeat_steps)
-    node.get_logger().info(f"Using P3atSlowControlEnv with repeat_steps={parsed_args.repeat_steps}")
+    envs = P3atVecEnv(repeat_steps=parsed_args.repeat_steps, num_envs=4)
+    node.get_logger().info(f"Using vec env (n = {envs.num_envs} envs) with repeat_steps={parsed_args.repeat_steps}")
 
     episodes = parsed_args.episodes
     # execute random agent
     node.get_logger().info("Starting the RANDOM AGENT now")
     for ep in range(episodes):
-        obs, info = env.reset()
-        done = False
-        while not done:
-            obs, reward, done, truncated, info = env.step(env.action_space.sample())
+        obs, infos = envs.reset()
+        done = [False] * envs.num_envs
+        while not any(done):
+            obs, rewards, dones, truncated, infos = envs.step([envs.action_space.sample() for _ in range(envs.num_envs)])
             # Optionally log agent state and reward here
 
-    env.close()
+    envs.close()
 
 
 if __name__ == "__main__":

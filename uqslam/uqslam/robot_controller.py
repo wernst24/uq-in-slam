@@ -3,7 +3,6 @@ from sensor_msgs.msg import LaserScan, Image
 from cv_bridge import CvBridge
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
-from std_srvs.srv import Empty
 from functools import partial
 import numpy as np
 from gazebo_msgs.srv import SetEntityState

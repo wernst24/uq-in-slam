@@ -3,7 +3,6 @@ from gymnasium import Env
 from gymnasium.spaces import Box, Discrete
 import numpy as np
 from uqslam.robot_controller import RobotController
-import math
 
 
 class P3atFastControlEnv(RobotController, Env):
@@ -29,14 +28,14 @@ class P3atFastControlEnv(RobotController, Env):
         - call_reset_simulation_service: resets the simulation
         - call_reset_robot_service: resets the robot position to desired position
     """
-    def __init__(self):
+    def __init__(self, prefix='robot1', robot_namespace='robot1_ns'):
 
         # Initialize the Robot Controller Node
-        super().__init__()
+        super().__init__(ns=robot_namespace, robo_name=prefix + "pioneer3at")
         self.get_logger().info("All the publishers/subscribers have been started")
 
         # ENVIRONMENT PARAMETERS
-        self.robot_name = 'p3at'
+        self.robot_name = f"{prefix}pioneer3at"
 
         # Initializes the starting agent location for each episode (x,y,angle)
         self._initial_agent_location = np.array([0, 0, -90], dtype=np.float32)

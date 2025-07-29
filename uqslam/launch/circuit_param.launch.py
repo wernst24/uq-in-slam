@@ -21,7 +21,7 @@ def launch_setup(context, *args, **kwargs):
 
     # Generate world from xacro with speedup
     world_xacro_path = os.path.join(pkg_dir, "worlds", world_file)
-    generated_world_path = f"/tmp/generated_{world_file.replace('.xacro','')}.world"
+    generated_world_path = f"/tmp/generated_{world_file.replace('.xacro','')}"
     xacro_cmd = [
         "xacro",
         world_xacro_path,

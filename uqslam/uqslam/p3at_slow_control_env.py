@@ -1,6 +1,4 @@
 from uqslam.p3at_fast_control_env import P3atFastControlEnv
-import rclpy
-import numpy as np
 from gymnasium import Env
 
 class P3atSlowControlEnv(Env):
@@ -8,8 +6,8 @@ class P3atSlowControlEnv(Env):
     Wrapper Gymnasium environment that repeats each action for N steps
     to simulate a slower control frequency.
     """
-    def __init__(self, repeat_steps=4):
-        self.env = P3atFastControlEnv()
+    def __init__(self, prefix="robot1", robot_namespace="robot1_ns", repeat_steps=4):
+        self.env = P3atFastControlEnv(prefix=prefix, robot_namespace=robot_namespace)
         self.repeat_steps = repeat_steps
         self.action_space = self.env.action_space
         self.observation_space = self.env.observation_space
