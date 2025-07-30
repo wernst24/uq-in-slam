@@ -50,6 +50,7 @@ setup(
           'start_training = uqslam.start_training:main',
           'trained_agent = uqslam.trained_agent:main',
           'random_agent = uqslam.random_agent:main',
+          'random_agent_slow = uqslam.random_agent_slow:main',
           'always_forward = uqslam.always_forward:main',
           'det_a2c_train = uqslam.Project_Det_TRAIN:main',
         ],
