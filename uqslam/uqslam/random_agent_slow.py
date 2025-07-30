@@ -27,6 +27,7 @@ def main(args=None):
         while not (done or truncated):
             obs, reward, done, truncated, info = env.step(env.action_space.sample())
             # node.get_logger().info(f"Episode {ep+1}, Reward: {reward}")
+        # node.get_logger().info(f"Episode {ep+1} completed with total reward: {env._total_reward}")
 
     env.close()
     node.get_logger().info("Random agent completed")

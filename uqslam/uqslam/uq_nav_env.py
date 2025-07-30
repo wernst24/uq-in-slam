@@ -63,7 +63,7 @@ class UQNavBotEnv(RobotController, Env):
         # Initializes the min distance from an obstacle for which the episode is concluded without success
         # This accounts for the front dimension of the robot - DO NOT CHANGE THIS
         # I changed it
-        self._minimum_dist_from_obstacles = 0.03
+        self._minimum_dist_from_obstacles = 0.35
 
         # valid spawn locations
         self._valid_spawn_xy = [
@@ -137,6 +137,7 @@ class UQNavBotEnv(RobotController, Env):
         info = self._get_info()
 
         # check for crash
+        # self.get_logger().info(f"Laser reads: {info['laser']}")
         if any(info["laser"] < self._minimum_dist_from_obstacles):
             reward -= 200
             self.get_logger().info("CRASHED, reward = " + str(self._total_reward))
