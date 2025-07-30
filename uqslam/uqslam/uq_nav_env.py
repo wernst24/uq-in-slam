@@ -55,7 +55,7 @@ class UQNavBotEnv(RobotController, Env):
         self.get_logger().info("All the publishers/subscribers have been started")
 
         # ENVIRONMENT PARAMETERS
-        self.robot_name = 'UQNavBotEnv'
+        self.robot_name = 'HospitalBot'
 
         # Initializes the starting agent location for each episode (x,y,angle)
         self._initial_agent_location = np.array([0, 0, -90], dtype=np.float32)

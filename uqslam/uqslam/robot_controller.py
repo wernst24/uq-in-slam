@@ -35,9 +35,9 @@ class RobotController(Node):
         - /delete_entity : unspawns the robot from the simulation
         - /spawn_entity : spawns the robot in the simulation in a semi-random position
     """
-    def __init__(self, instance_num=0):
+    def __init__(self):
         # using namespace to allow for multiple gazebo simulations to run in parallel
-        namespace_name = f"/simulation_{instance_num}"
+        namespace_name = ""
         super().__init__('robot_controller', namespace=namespace_name)
         self.get_logger().info("The robot controller node has just been created")
 

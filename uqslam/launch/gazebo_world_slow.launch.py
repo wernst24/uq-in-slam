@@ -10,9 +10,9 @@ from launch.actions import ExecuteProcess
 from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
-    ld = []
+    ld = LaunchDescription()
     use_sim_time = LaunchConfiguration('use_sim_time', default='True')
-    world_file_name = 'circuit.world'
+    world_file_name = 'circuit_realtime.world'
     pkg_dir = get_package_share_directory('uqslam')
 
     os.environ["GAZEBO_MODEL_PATH"] = os.path.join(pkg_dir, 'models')
@@ -20,25 +20,22 @@ def generate_launch_description():
     world = os.path.join(pkg_dir, 'worlds', world_file_name)
 
     # Launch Gazebo with GUI
-    ld.append(ExecuteProcess(
+    ld.add_action(ExecuteProcess(
         cmd=['gazebo', '--verbose', world, '-s', 'libgazebo_ros_init.so',
              '-s', 'libgazebo_ros_factory.so'],
         output='screen'))
 
-    # Spawn 16 robots in a 4x4 grid, each with a unique name and position
-    for r in range(4):
-        for c in range(4):
-            ld.append(Node(
-                package='uqslam',
-                executable='spawn_demo',
-                arguments=[
-                    'HospitalBot',
-                    f'simulation_{r*4+c}',
-                    '1',
-                    str(100.0 + c*2.0),  # X position
-                    str(-100.0 + r*2.0)  # Y position
-                ],
-                output='screen'
-            ))
+    ld.add_action(Node(
+        package='uqslam',
+        executable='spawn_demo',
+        arguments=[
+            'HospitalBot',
+            'demo',
+            '1',
+            '0.0',
+            '0.0'
+        ],
+        output='screen'
+    ))
 
-    return LaunchDescription(ld)
+    return ld

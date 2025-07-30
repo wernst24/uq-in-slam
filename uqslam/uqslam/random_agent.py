@@ -20,7 +20,7 @@ def main(args=None):
     # register gymnasium env created in uq_nav_env module
     gym.envs.registration.register(
         id="HospitalBotEnv-v0",
-        entry_point="uqslam.uq_nav_env:HospitalBotEnv",
+        entry_point="uqslam.uq_nav_env:UQNavBotEnv",
         max_episode_steps=3000,
     )
 
@@ -38,7 +38,7 @@ def main(args=None):
         while not done:
             obs, reward, done, truncated, info = env.step(
                 env.action_space.sample())
-            node.get_logger().info(f"shape of obs: {obs.shape}")
+            # node.get_logger().info(f"shape of obs: {obs.shape}")
             # should log agent state and reward
 
             # while cv2.waitKey(1) != ord('q'):
