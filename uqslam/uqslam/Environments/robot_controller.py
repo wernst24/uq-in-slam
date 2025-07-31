@@ -61,10 +61,17 @@ class RobotController(Node):
             get_package_share_directory("uqslam"), "models",
         "pioneer3at", "model.sdf")
 
-        # Initialize attributes - This will be immediately re-written when the simulation starts
-        self._agent_location = np.array([np.float32(1),np.float32(16)]) 
-        self._laser_reads = np.array([np.float32(10)] * 5)
+        # Initialize attributes with gym-gazebo compatibility
+        self._agent_location = np.array([np.float32(0), np.float32(0)]) 
+        self._agent_orientation = np.float32(0.0)  # Add orientation tracking
+        self._laser_reads = np.array([np.float32(3.5)] * 360)  # 360-degree LIDAR like gym-gazebo
         self._image_raw = np.zeros((32, 32, 3), dtype=np.uint8)
+        
+        # State flags for synchronization
+        self._done_pose = False
+        self._done_laser = False
+        self._done_camera = False
+        self._done_set_rob_state = False
 
     # Method to send the velocity command to the robot
     def send_velocity_command(self, velocity):
@@ -75,15 +82,27 @@ class RobotController(Node):
 
     # Method that saves the position of the robot each time the topic /demo/odom receives a new message
     def pose_callback(self, msg: Odometry):
-        # self._agent_location = np.array([np.float32(np.clip(msg.pose.pose.position.x, -12, 12)), np.float32(np.clip(msg.pose.pose.position.y, -35, 21))])
-        # self._agent_orientation = 2 * math.atan2(msg.pose.pose.orientation.z, msg.pose.pose.orientation.w)
+        # Extract position (gym-gazebo style)
+        self._agent_location = np.array([
+            np.float32(msg.pose.pose.position.x), 
+            np.float32(msg.pose.pose.position.y)
+        ])
+        # Extract orientation as Euler angle
+        self._agent_orientation = 2 * math.atan2(
+            msg.pose.pose.orientation.z, 
+            msg.pose.pose.orientation.w
+        )
         self._done_pose = True
 
     # Method that saves the laser reads each time the topic /demo/laser/out receives a new message
     def laser_callback(self, msg: LaserScan):
-        self._laser_reads = np.array(msg.ranges)
-        # Converts inf values to 10
-        self._laser_reads[self._laser_reads == np.inf] = np.float32(10)
+        # Process laser data similar to gym-gazebo
+        self._laser_reads = np.array(msg.ranges, dtype=np.float32)
+        # Replace inf and nan values
+        self._laser_reads[self._laser_reads == np.inf] = np.float32(3.5)
+        self._laser_reads[np.isnan(self._laser_reads)] = np.float32(0.0)
+        # Clip values to reasonable range
+        self._laser_reads = np.clip(self._laser_reads, 0.0, 3.5)
         self._done_laser = True
         
     def camera_callback(self, msg: Image):

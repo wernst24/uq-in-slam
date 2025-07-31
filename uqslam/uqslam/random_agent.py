@@ -1,6 +1,6 @@
 import rclpy
 import gymnasium as gym
-from uqslam.uq_nav_env import UQNavBotEnv
+from uqslam.uqslam.Environments.uq_nav_env import UQNavBotEnv
 # import cv2
 
 

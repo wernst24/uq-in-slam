@@ -522,6 +522,21 @@ class A2CAgent:
 
 
 
+class Model_A2C(tf.keras.Model):
+    def __init__(self, num_actions):
+        super(Model_A2C, self).__init__(name='mlp_policy')
+        # ... existing initialization code ...
+        
+        # Build the model with a dummy input to avoid build warnings
+        self.build((None, 32, 32, 3))
+    
+    def build(self, input_shape):
+        """Properly build the model layers"""
+        super(Model_A2C, self).build(input_shape)
+    
+    def call(self, inputs, **kwargs):
+        # ... existing call method ...
+        pass
 def nll_gaussian(y_test, y_pred_mean, y_pred_sd, num_labels, batch_size, advs):
     y_pred_sd_ns = tf.cast(y_pred_sd, tf.float32)
     y_test = tf.cast(y_test, tf.float32)
@@ -539,4 +554,4 @@ def nll_gaussian(y_test, y_pred_mean, y_pred_sd, num_labels, batch_size, advs):
     loss = tf.math.reduce_mean(tf.math.add(loss1,loss2))
     loss = tf.where(tf.math.is_nan(loss), tf.zeros_like(loss), loss)
     loss = tf.where(tf.math.is_inf(loss), tf.zeros_like(loss), loss)
-    return loss 
+    return loss

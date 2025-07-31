@@ -21,7 +21,7 @@ from gymnasium import Env  # Base class for Gym-compatible RL environments
 from gymnasium.spaces import Box, Discrete  # Spaces for observation and action
 import numpy as np  # Numerical computing
 # Custom ROS2 node for robot control
-from uqslam.robot_controller import RobotController
+from uqslam.uqslam.Environments.robot_controller import RobotController
 
 
 class UQNavBotEnv(RobotController, Env):
@@ -48,7 +48,7 @@ class UQNavBotEnv(RobotController, Env):
         - call_reset_robot_service: resets the robot position to desired position
     """
 
-    def __init__(self, instance_num=0):
+    def __init__(self):
 
         # Initialize the Robot Controller Node
         super().__init__()
@@ -112,42 +112,61 @@ class UQNavBotEnv(RobotController, Env):
         self.observation_space = Box(
             low=0, high=1, shape=(32, 32, 3), dtype=np.float32)
 
+        # DR. DERA'S REWARD PARAMETERS
+        self._goal_position = np.array([4.5, -4.0], dtype=np.float32)  # Target destination
+        self._previous_distance_to_goal = None
+        self._collision_reward = -100.0
+        self._goal_reward = 200.0
+        self._step_penalty = -0.1
+        self._distance_reward_factor = 10.0
+        self._min_laser_range = 3.5  # From gym-gazebo
+
     def step(self, action):
         done = False
         truncated = False
-
-        reward = 0
-
-        if action == 0:
-            reward += 5  # 5 for forward
-        else:
-            reward += 1  # 1 for turn
-
+        
+        # Store previous position for distance calculation
+        prev_position = self._agent_location.copy() if hasattr(self, '_agent_location') else np.array([0, 0])
+        
         self._num_steps += 1
-
-        # self.get_logger().info("Action applied: " + str(action))
         self.send_velocity_command(self.action_to_direction[action])
-
-        # Spin the node until laser reads and agent location are updated - VERY IMPORTANT
         self.spin()
-
-        # Update robot location and laser reads
+        
         observation = self._get_obs()
-        # print("Observation shape: ", observation.shape)
         info = self._get_info()
-
-        # check for crash
-        # self.get_logger().info(f"Laser reads: {info['laser']}")
-        if any(info["laser"] < self._minimum_dist_from_obstacles):
-            reward -= 200
-            self.get_logger().info("CRASHED, reward = " + str(self._total_reward))
-            self._total_reward += reward
+        
+        # DR. DERA'S REWARD IMPLEMENTATION
+        reward = self._step_penalty  # Small penalty for each step
+        
+        # Calculate distance to goal
+        current_distance = np.linalg.norm(self._agent_location - self._goal_position)
+        
+        # Distance-based reward (similar to gym-gazebo)
+        if self._previous_distance_to_goal is not None:
+            distance_improvement = self._previous_distance_to_goal - current_distance
+            reward += distance_improvement * self._distance_reward_factor
+        
+        self._previous_distance_to_goal = current_distance
+        
+        # Goal reached check
+        if current_distance < 0.5:  # Within 0.5m of goal
+            reward += self._goal_reward
             done = True
-            # debug
-
+            self.get_logger().info(f"GOAL REACHED! Distance: {current_distance:.2f}")
+        
+        # Collision detection (Dr. Dera's approach)
+        min_laser_reading = np.min(info["laser"])
+        if min_laser_reading < self._minimum_dist_from_obstacles:
+            reward += self._collision_reward
+            done = True
+            self.get_logger().info(f"COLLISION! Min laser: {min_laser_reading:.2f}")
+        
+        # Laser-based reward shaping (encourage safe navigation)
+        if min_laser_reading < 1.0:
+            reward -= (1.0 - min_laser_reading) * 5.0  # Penalty for getting too close
+        
         # Check if episode is terminated
         if self._num_steps > self._max_num_steps:
-            # truncate session
             done = True
             truncated = True
 
@@ -188,6 +207,9 @@ class UQNavBotEnv(RobotController, Env):
         # reset total reward
         self._total_reward = 0
 
+        # Reset distance tracking
+        self._previous_distance_to_goal = None
+
         return observation, info
 
     def _get_obs(self):
@@ -212,13 +234,10 @@ class UQNavBotEnv(RobotController, Env):
         position_y = xy[1]
 
         theta = np.random.uniform(0, 2 * np.pi)
-        orientation_z = np.cos(theta)
-        orientation_w = np.sin(theta)
+        orientation_z = np.sin(theta/2)  # Corrected quaternion math
+        orientation_w = np.cos(theta/2)
 
-        position_x = 0
-        position_y = 0
-        orientation_z = 0
-        orientation_w = 0
+        # ENABLE PROPER RANDOMIZATION
         return [position_x, position_y, orientation_z, orientation_w]
 
     def close(self):

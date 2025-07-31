@@ -53,6 +53,8 @@ setup(
           'random_agent_slow = uqslam.random_agent_slow:main',
           'always_forward = uqslam.always_forward:main',
           'det_a2c_train = uqslam.Project_Det_TRAIN:main',
+          'trained_agent_wandb = uqslam.inspect_wandb_model:main',
+          'train_sb3 = uqslam.sb3_a2c_train:main',
         ],
     },
 )

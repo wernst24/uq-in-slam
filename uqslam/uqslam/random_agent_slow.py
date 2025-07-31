@@ -1,5 +1,5 @@
 import rclpy
-from uqslam.uq_nav_slow_env import UQNavSlowEnv
+from uqslam.uqslam.Environments.uq_nav_slow_env import UQNavSlowEnv
 
 
 class TrainingNode(rclpy.node.Node):

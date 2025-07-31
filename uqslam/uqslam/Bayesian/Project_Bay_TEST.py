@@ -8,7 +8,7 @@ import time
 import numpy as np
 import random
 import time
-import Network_Model_Bay_TRAIN as net
+import uqslam.uqslam.Bayesian.Network_Model_Bay_TEST as net
 import liveplot
 import tensorflow as tf
 import matplotlib
@@ -31,7 +31,6 @@ def render():
         env.render(close=True)
 
 if __name__ == '__main__':
-
     #modelTes = tf.keras.models.Sequential()
     #modelTes.add(tf.keras.layers.Input(1))
     #modelTes.add(tf.keras.layers.Dense(1))
@@ -96,13 +95,15 @@ if __name__ == '__main__':
     img_rows, img_cols, img_channels = env.img_rows, env.img_cols, env.img_channels
 
 
-
+    #----------------------- Load Weights for Testing: -----------------
     model_Critic = net.Critic_CNN(state_dim=3)
     model_Actor = net.Actor_VDP(kernel_size=kernels_size, num_kernel=num_kernels, pooling_size=maxpooling_size,
                                  pooling_stride=maxpooling_stride, pooling_pad=maxpooling_pad, units=class_num,
                                  name='vdp_cnn')
 
-    
+    model_Actor.load_weights("/home/bryan/Documents/Bay A2C GOOD/turtle_c2c_Actor_ep350_train")
+    #model_Actor.dist.load_weights("/home/bryan/Documents/Bay A2C GOOD/turtle_Dist350_train")
+    model_Critic.load_weights("/home/bryan/Documents/Bay A2C GOOD/turtle_c2c_Critic_ep350_train")
     agent = net.A2CAgent(model_Actor, model_Critic, learningRate)
 
     #env = gym.wrappers.Monitor(env, outdir, force=True)
@@ -117,6 +118,8 @@ if __name__ == '__main__':
     steps = 1500
 
 
+
+
     total_episodes = 10000
     highest_reward = 0
     epsilon_discount = 0.999 # 1098 eps to reach 0.1
@@ -126,11 +129,11 @@ if __name__ == '__main__':
     #addRow_action = np.zeros((1,2))
     batch_sz = 16
     ep_rewards = [0.0]
-    wandb.init(entity = "bpedraz4", project="Train_Bay_Framework_{}_lr_{}_kfold".format(total_episodes, learningRate))
+    wandb.init(entity = "bpedraz4", project="TEST_Bay_Framework_{}_lr_{}_kfold".format(total_episodes, learningRate))
 
     start_time = time.time()
     observation = env.reset()
-    
+
     for x in range(1, total_episodes, 1):
         done = False
         cumulated_reward = 0
@@ -143,44 +146,70 @@ if __name__ == '__main__':
         batch_step = 0
         #temp_obs = np.empty((1,5))
 
+        #act = np.zeros(3)
+        #sig = np.zeros(3)
+        myAvgCertain = []
+        myAvgUncertain = []
+        
+        #table_mean = wandb.Table(columns=["1", "2", "3"])
+        #table_sig = wandb.Table(columns=["1", "2", "3"])
 
         #while not done:
         for i in range(steps): #<------ steps=1500
 
-            actions[batch_step], values[batch_step] = agent.action_value(observation)
+
+            actions[batch_step], values[batch_step], snr_signal, uncertain, certain, var = agent.action_value(observation)
             newObservation, rewards[batch_step], dones[batch_step], info = env.step(actions[batch_step])
+
+            
+            myAvgUncertain.append(uncertain)
+            myAvgCertain.append(certain)
+
+            
+            wandb.log({'Uncertain': uncertain,
+                       'Certain': certain
+                      })
+            
+
 
             mem_observation[batch_step] = observation
             observation = newObservation
-
-
             cumulated_reward += rewards[batch_step]
             #ep_rewards[-1] += rewards[i]
-
             #env._flush(force=True)
 
+            '''
+            print('below')
+            print(rewards[batch_step])
+            print(var)
+            time.sleep(8)
+            print('above')
+            '''
 
-            if (batch_step == 15): #<---- batch size: learn after 250 steps
-                if(i>250):
-                    _, next_value = agent.action_value( observation )
-                    returns, advs = agent._returns_advantages(rewards, dones, values, next_value)
 
-                    # Performs a full training step on the collected batch.
-                    losses_actor = agent.train_on_batch_actor( mem_observation, actions, advs )
-                    losses_critic = agent.train_on_batch_critic( mem_observation, returns )
-                    
-
-                    numpy_loss = np.asarray(losses_actor)
-
-                    wandb.log( {'loss_actor': numpy_loss} )
-                    wandb.log({'losses_critic': np.asarray( losses_critic ) })
-
+            if (batch_step == 15):
                 batch_step = -1
-                mem_observation = np.zeros(( batch_sz, 32,32,1))
-                actions = np.zeros(batch_sz)
-                values = np.zeros(batch_sz)
-                rewards = np.zeros(batch_sz)
-                dones = np.zeros(batch_sz)
+                #mem_observation = np.zeros(( batch_sz, 32,32,1))
+                #actions = np.zeros(batch_sz)
+                #values = np.zeros(batch_sz)
+                #rewards = np.zeros(batch_sz)
+                #dones = np.zeros(batch_sz)
+            '''
+            if (i>900): #save 100 action_mean, sigma, snr_signal
+                if (i==901):
+                    textfile = open('Parameters.txt', 'w')
+                    textfile.write(' Mean: ' + str(act))
+                    textfile.write(', Uncertain: ' + str(sig))
+                    textfile.write(', SNR_signal: ' + str(snr_signal))
+
+                textfile.write('\n Mean: ' + str(act))
+                textfile.write(', Uncertain: ' + str(sig))
+                textfile.write(', SNR_signal: ' + str(snr_signal))
+
+                if (i==1000):
+                    textfile.close()
+                    print("---- DONEEEEEE ----")
+            '''
 
 
             if (dones[batch_step]):
@@ -199,6 +228,7 @@ if __name__ == '__main__':
                     print ("EP "+str(x)+" - {} steps".format(i+1)+" - CReward: "+str(round(cumulated_reward, 2))+"  Eps="+str(round(explorationRate, 2))+"  Time: %d:%02d:%02d" % (h, m, s))
                 else :
                     print ("EP "+str(x)+" - {} steps".format(i+1)+" - last100 C_Rewards : "+str(int((sum(last100Rewards)/len(last100Rewards))))+" - CReward: "+str(round(cumulated_reward, 2))+"  Eps="+str(round(explorationRate, 2))+"  Time: %d:%02d:%02d" % (h, m, s))
+        
 
                 '''
                 mem_observation = np.append(mem_observation, addRow, axis=0)
@@ -234,37 +264,21 @@ if __name__ == '__main__':
                 print("Frames = "+str(i))
 
             batch_step += 1
+            
 
 
-        #SAVE AND PLOT DATA
+
         myRewardList.append(cumulated_reward)
         if x % 50 == 0:
-            #SAVE model weights and monitoring data every 50 epochs.
-            agent.model_Act.save_weights('/tmp/turtle_c2c_Actor_ep'+str(x)+"_train")
-            #agent.model_Act.dist.save_weights('/tmp/turtle_Dist'+str(x)+"_train")
-            agent.model_Cri.save_weights('/tmp/turtle_c2c_Critic_ep'+str(x)+"_train")
-
-            
-            #copy_tree(outdir,'/tmp/turtle_c2c_dqn_ep'+str(x))
-            #save simulation parameters.
-            parameter_keys = ['explorationRate','minibatch_size','learnStart','learningRate','discountFactor','memorySize','network_outputs','current_epoch','stepCounter','EXPLORE','INITIAL_EPSILON','FINAL_EPSILON','loadsim_seconds']
-            parameter_values = [explorationRate, minibatch_size, learnStart, learningRate, discountFactor, memorySize, network_outputs, x, i, EXPLORE, INITIAL_EPSILON, FINAL_EPSILON,s]
-            parameter_dictionary = dict(zip(parameter_keys, parameter_values))
-            with open('/tmp/turtle_c2c_dqn_ep'+str(x)+'.json', 'w') as outfile:
-                json.dump(parameter_dictionary, outfile)
-
-            
-            #PLOT
+            print("PLOTTTTTTT")
             x_plot = range(x) #list( range(100) ) #for total number of episodes/epochs
             x_plot_avg.append(x)
             y_plot_avg.append( sum(myRewardList[x-50:x]) /50 )
             
-            '''
             plt.plot(x_plot, myRewardList, color='blue')
             plt.plot(x_plot_avg, y_plot_avg , color='red')
 
             plt.pause(0.001)
-
 
             #Save Values:
             #np_x_plot = np.asarray(x_plot)
@@ -276,31 +290,26 @@ if __name__ == '__main__':
             np.save('rewards.npy', np_rewards)
             np.save('x_plot_avg.npy', np_x_plot_avg)
             np.save('reward_avg.npy', np_rewards_avg)
-            '''
 
             wandb.log({"Cumulative Rewards": sum(myRewardList[x-50:x]) /50 })
 
 
         wandb.log({'Rewards': myRewardList[x-1],
-                           'epoch': x
+                           'epoch': x,
+                           'SNR_signal': snr_signal,
+                           'Var': var,
+                           'Avg Certain': sum(myAvgCertain)/steps,
+                           'Avg Uncertain': sum(myAvgUncertain)/steps
                            })
+
 
 
         m, s = divmod(int(time.time() - start_time), 60)
         h, m = divmod(m, 60)
-        #print ("EP: "+str(x+1)+" - [alpha: "+str(round(qlearn.alpha,2))+" - gamma: "+str(round(qlearn.gamma,2))+" - epsilon: "+str(round(qlearn.epsilon,2))+"] - Reward: "+str(cumulated_reward)+"     Time: %d:%02d:%02d" % (h, m, s))        
-
-        net.logging.debug("[%d/%d] Losses: %s" % (x + 1, total_episodes, losses_actor))
+        #print ("EP: "+str(x+1)+" - [alpha: "+str(round(qlearn.alpha,2))+" - gamma: "+str(round(qlearn.gamma,2))+" - epsilon: "+str(round(qlearn.epsilon,2))+"] - Reward: "+str(cumulated_reward)+"     Time: %d:%02d:%02d" % (h, m, s))
 
 
-        if (x == 200):
-            total_time = ( time.time() - start_time )
-
-            wandb.log({'Total Training Time': total_time })
-            np.save('Total_Test_Time_BAY.npy', total_time)
-
-            #break;
-        
+        #net.logging.debug("[%d/%d] Losses: %s" % (x + 1, total_episodes, losses_actor))
 
 
     #Github table content

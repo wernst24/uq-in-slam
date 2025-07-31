@@ -55,7 +55,7 @@ from tensorflow.keras.layers import (
     BatchNormalization, Lambda, LeakyReLU, MaxPooling2D
 )
 
-from . import memory
+from .. import memory
 
 
 parser = argparse.ArgumentParser()
@@ -295,103 +295,111 @@ class ProbabilityDistribution(tf.keras.Model):
 
 class Model_A2C(tf.keras.Model):
     def __init__(self, num_actions):
-        super(Model_A2C, self).__init__(name='mlp_policy')
+        super(Model_A2C, self).__init__(name='deterministic_a2c_policy')
         self.value_c = 0.5
         self.gamma = 0.99
-        self.entropy_c = 1e-4
+        self.entropy_c = 1e-5  # Reduced for more deterministic behavior
 
         input = Input((32, 32, 3), name='policy_input')
-        '''
-        # ------ CNN Part ------
-        conv_1 = Conv2D(64, (3,3), strides=(2,2), activation='relu') (input)
-        zeroPad = ZeroPadding2D((1, 1)) (conv_1)
-        conv_2 = Conv2D(64, (3,3), strides=(2,2), activation='relu') (zeroPad)
-        maxPool_1 = MaxPooling2D(pool_size=(2, 2), strides=(2,2)) (conv_2)
-        flat = Flatten() (maxPool_1)
-        '''
+        
+        # DR. DERA'S CNN ARCHITECTURE - FIXED DIMENSIONS
+        # Convert RGB to grayscale for consistency
         rgb2gray = Lambda(lambda x: tf.image.rgb_to_grayscale(x))(input)
-        # ----- CNN Part (Optional) 1st run -----
-        conv1 = Conv2D(32, (4, 4), strides=(2, 2), activation='relu')(rgb2gray)
-        conv2 = Conv2D(64, (4, 4), strides=(2, 2), activation='relu')(conv1)
-        # zero_pad1 = ZeroPadding2D((1, 1)) (conv2)
-        conv3 = Conv2D(64, (3, 3), strides=(2, 2), activation='relu')(conv2)
-        max_pool = MaxPooling2D(pool_size=(2, 2), strides=(2, 2))(conv3)
+        
+        # Fixed CNN layers with proper dimension management
+        conv1 = Conv2D(32, (4, 4), strides=(2, 2), activation='relu', 
+                      kernel_initializer='he_uniform', padding='same')(rgb2gray)  # 16x16x32
+        conv2 = Conv2D(64, (4, 4), strides=(2, 2), activation='relu',
+                      kernel_initializer='he_uniform', padding='same')(conv1)    # 8x8x64
+        conv3 = Conv2D(64, (3, 3), strides=(2, 2), activation='relu',
+                      kernel_initializer='he_uniform', padding='same')(conv2)    # 4x4x64
+        
+        flat = Flatten()(conv3)
+        
+        # Shared dense layer
+        shared_dense = kl.Dense(512, activation='relu', 
+                               kernel_initializer='he_uniform')(flat)
+        
+        # Actor branch (more deterministic)
+        actor_dense1 = kl.Dense(256, activation='relu', 
+                               kernel_initializer='he_uniform')(shared_dense)
+        actor_dense2 = kl.Dense(128, activation='relu',
+                               kernel_initializer='he_uniform')(actor_dense1)
+        # Use smaller initialization for more deterministic policy
+        out_action = kl.Dense(num_actions, name='policy_logits',
+                             kernel_initializer=tf.keras.initializers.RandomNormal(stddev=0.01))(actor_dense2)
 
-        '''
-        # ----- CNN Part (Optional) 2nd/3ird run -----
-        conv1 = Conv2D(32, (4,4), strides=(2,2), activation='relu') (input)
-        conv2 = Conv2D(64, (4,4), strides=(2,2), activation='relu') (conv1)
-        conv3 = Conv2D(64, (2,2), strides=(2,2), activation='relu') (conv2)
-        max_pool = MaxPooling2D(pool_size=(2, 2), strides=(2,2)) (conv3)
-        '''
+        # Critic branch
+        critic_dense1 = kl.Dense(256, activation='relu',
+                                kernel_initializer='he_uniform')(shared_dense)
+        critic_dense2 = kl.Dense(128, activation='relu',
+                                kernel_initializer='he_uniform')(critic_dense1)
+        valueOut_Cri = kl.Dense(1, name='value',
+                               kernel_initializer='he_uniform')(critic_dense2)
 
-        drop1 = Dropout(0.2)(max_pool)
-        flat = Flatten()(drop1)
-
-        # ------- A2C Part -------
-        # Note: no tf.get_variable(), just simple Keras API!
-        # input_X = kl.Dense(480, activation='relu') (flat) #For Actor
-        # input_Cri = kl.Dense(240,  kernel_initializer='he_uniform',activation='relu') (flat) #For Critic
-
-        #  For Actor Action:
-        hidden1_Act = kl.Dense(64, activation='relu')(flat)
-        hidden2_Act = kl.Dense(400, activation='relu')(hidden1_Act)
-        hidden3_Act = kl.Dense(200, activation='relu')(hidden2_Act)
-        # Logits are unnormalized log probabilities.
-        out_action = kl.Dense(num_actions, name='policy_logits1')(hidden3_Act)
-
-        #  For Critic Value:
-        hidden1_Cri = kl.Dense(64, activation='relu')(flat)
-        hidden2_Cri = kl.Dense(400, activation='relu')(hidden1_Cri)
-        hidden3_Cri = kl.Dense(200, activation='relu')(hidden2_Cri)
-        valueOut_Cri = kl.Dense(1, name='value')(hidden3_Cri)
-
-        # ------ Create Network Model ------
-        self.network = Model(inputs=input, outputs=[
-                             out_action, valueOut_Cri])  # for value
-        # self.network.compile( optimizer=ko.RMSprop(lr=7e-3),loss=self._value_loss)
-        # self.network2 = Model(inputs=input, outputs=[mu_linear_output, mu_angle_output, std_output]) # for continous action
-        # self.network2.compile( optimizer=ko.RMSprop(lr=7e-3),loss=[self._logits_loss, 'MSE', 'MSE'])
-
+        self.network = Model(inputs=input, outputs=[out_action, valueOut_Cri])
         self.dist = ProbabilityDistribution()
 
+    def build(self, input_shape):
+        """Properly build the model layers"""
+        super(Model_A2C, self).build(input_shape)
+        # Build the internal network
+        dummy_input = tf.zeros((1, 32, 32, 3))
+        _ = self.network(dummy_input)
+
     def call(self, inputs, **kwargs):
-        # Inputs is a numpy array, convert to a tensor.
-        # x = tf.convert_to_tensor(inputs)
-        # print(kwargs.get("training") == True)
-        # print(f"Shape of inputs (in call function): {inputs.shape}")
-        # print(f"type of inputs (in call function): {type(inputs)}")
-        if (inputs.shape.ndims == 3):
+        # Handle case where inputs might be in a list
+        if isinstance(inputs, list):
+            inputs = inputs[0]
+        
+        # Ensure proper tensor format
+        if not isinstance(inputs, tf.Tensor):
+            inputs = tf.convert_to_tensor(inputs, dtype=tf.float32)
+        
+        # Add batch dimension if needed
+        if len(inputs.shape) == 3:
             inputs = tf.expand_dims(inputs, axis=0)
+        
         return self.network(inputs)
 
 
 class A2CAgent:
-    def __init__(self, model, lr=7e-3, gamma=0.99, value_c=0.5, entropy_c=1e-4):
-        # `gamma` is the discount factor; coefficients are used for the loss terms.
+    def __init__(self, model, lr=1e-3, gamma=0.99, value_c=0.5, entropy_c=1e-5):
+        # Reduced entropy for more deterministic behavior
         self.gamma = gamma
         self.value_c = value_c
-        self.entropy_c = entropy_c
-
+        self.entropy_c = entropy_c  # Much lower than before
         self.model = model
 
+        # Use Adam optimizer like in Dr. Dera's work
         self.model.compile(
-            optimizer=ko.RMSprop(learning_rate=lr),
-            # Define separate losses for policy logits and value estimate.
-            loss=[self._logits_loss, self._value_loss])
+            optimizer=ko.Adam(learning_rate=lr, clipnorm=0.5),  # Gradient clipping
+            loss=[self._logits_loss, self._value_loss],
+            run_eagerly=False
+        )
+        
+        # Simplified pre-compilation without train_on_batch
+        dummy_obs = tf.random.normal((1, 32, 32, 3))
+        _ = self.model(dummy_obs, training=False)
+        
+        # Build the model properly
+        self.model.build((None, 32, 32, 3))
 
     def action_value(self, obs):
-        # Executes `call()` under the hood.
-        # self.obs_temp[0] = obs
-
-        logits, value = self.model.predict_on_batch(obs)
-
-        action = self.model.dist.predict_on_batch(logits)
-
-        # Another way to sample actions:
-        #   action = tf.random.categorical(logits, 1)
-        # Will become clearer later why we don't use it.
-        return action, value[0]
+        # More deterministic action selection
+        if obs.ndim == 3:
+            obs = np.expand_dims(obs, axis=0)
+        
+        logits, value = self.model(obs, training=False)
+        
+        # For more deterministic behavior, use temperature scaling
+        temperature = 0.1  # Lower temperature = more deterministic
+        scaled_logits = logits / temperature
+        
+        # Sample action with reduced randomness
+        action = tf.squeeze(tf.random.categorical(scaled_logits, 1), axis=-1)
+        
+        return int(action.numpy()[0]), float(value.numpy()[0, 0])
 
     def _returns_advantages(self, rewards, dones, values, next_value):
         # `next_value` is the bootstrap value estimate of the future state (critic).

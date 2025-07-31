@@ -4,7 +4,7 @@ Repeats each action multiple times to achieve slower control frequency.
 """
 import gymnasium as gym
 import numpy as np
-from uqslam.uq_nav_env import UQNavBotEnv
+from uqslam.uqslam.Environments.uq_nav_env import UQNavBotEnv
 
 
 class UQNavSlowEnv(gym.Wrapper):
@@ -12,9 +12,9 @@ class UQNavSlowEnv(gym.Wrapper):
     Wrapper that repeats each action multiple times for slower control frequency.
     """
     
-    def __init__(self, instance_num=0, repeat_steps=4):
+    def __init__(self, repeat_steps=4):
         # Create the base environment
-        base_env = UQNavBotEnv(instance_num=instance_num)
+        base_env = UQNavBotEnv()
         super().__init__(base_env)
         
         self.repeat_steps = repeat_steps
